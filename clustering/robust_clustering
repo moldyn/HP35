@@ -32,7 +32,7 @@ main() {
   for req in "${requirements[@]}"; do
     run_command "$req" "command -v $req >/dev/null 2>&1"
   done
-  run_command "python venv" "python3 -m venv -h"
+  run_command "python venv" "python3 -m venv -h >/dev/null 2>&1"
   cleanup_if_failed && printf "\n"
 
 
