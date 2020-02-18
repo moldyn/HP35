@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+
+### CONSTANTS #################################################################
+# path
+readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly TRAJ_DIH="../HP35-DESRES/traj.dat"
+readonly TRAJ_DPCA="../dpca/traj.proj"
+readonly TRAJ_SEL="../dpca/traj.proj.1-5_7"
+readonly TRAJ_MS="../clustering/microstates"
+readonly DIR="robust_clustering_benchmark"
+
+# define executables
+readonly CLUSTERING="../Clustering/build/clustering"
+readonly FASTPCA="../FastPCA/build/src/fastpca"
+
+# define requirements except of python venv
+declare -a requirements=("gcc" "nvcc" "git" "python3")
+### MAIN ######################################################################
+main() {
+  # print welcome
+  print_welcome
+
+  # print user info and warning
+  print_info
+
+  # remove dir if existing
+  mkdir_ask $DIR
+  cd $DIR
+  printf "\n"
+
+  pheader "CHECK REQUIREMENTS"
+  for req in "${requirements[@]}"; do
+    run_command "$req" "command -v $req >/dev/null 2>&1"
+  done
+  run_command "python venv" "python3 -m venv -h"
+  cleanup_if_failed && printf "\n"
+
+
+  ### SETUP PYTHON VENV #######################################################
+  pheader "SETUP PYTHON VENV"
+  run_command "create venv" "python3 -m venv Python"
+  run_command "activate venv" ". Python/bin/activate"
+  run_command "update pip" "pip install --upgrade pip"
+  run_command "install dependencies" "pip install numpy pandas"
+  cleanup_if_failed && printf "\n"
+
+
+  ### COMPILE CLUSTERING ######################################################
+  pheader "DOWNLOAD AND COMPILE ROBUST CLUSTERING"
+  run_command "clone ${MOLDYN_GIT}Clustering.git" "git clone ${MOLDYN_GIT}Clustering.git"
+  cd Clustering && mkdir build && cd build
+  # todo allow gcc 5 for cuda < 9.2
+  nvcc_ver=$(nvcc --version | grep -o -P '(?<=release ).*(?=, V)')
+  if [[ ${nvcc_ver:0:1} > 8 && ${nvcc_ver:2:1} > 1 ]]; then
+    gcc_ver=7
+  else
+    gcc_ver=5 
+  fi
+  run_command "cmake" "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
+  run_command "make" "make"
+  cd ../../
+  cleanup_if_failed && printf "\n"
+
+
+  ### COMPILE DPCA+ ###########################################################
+  pheader "DOWNLOAD AND COMPILE DPC+"
+  # get gcc version for selecting correct branch
+  gcc_ver=$(gcc -dumpversion)
+  if [[ ${gcc_ver:0:1} > 7 ]]; then
+    branch="--branch fix_gcc8 "
+  else
+    branch=""
+  fi
+  run_command "clone ${MOLDYN_GIT}FASTPCA.git" "git clone ${branch}${MOLDYN_GIT}FastPCA.git"
+  cd FastPCA && mkdir build && cd build
+  run_command "cmake" "cmake .."
+  run_command "make" "make"
+  cd ../../
+  cleanup_if_failed && printf "\n"
+
+
+  ### DOWNLOAD HP35 BENCHMARK TRAJECTORY ######################################
+  pheader "DOWNLOAD HP35 BENCHMARK TRAJECTORY"
+  run_command "clone ${MOLDYN_GIT}HP35-DESRES.git" "git clone ${MOLDYN_GIT}HP35-DESRES.git"
+  cd HP35-DESRES
+  run_command "unzip trajectory" "bunzip2 -k traj.dat.bz2"
+  cd ../
+  cleanup_if_failed && printf "\n"
+
+
+  ### RUN DPCA+ ###############################################################
+  pheader "RUN DPCA+"
+  mkdir dpca && cd dpca
+  run_command "perform pca" "$FASTPCA -f $TRAJ_DIH -P -p $TRAJ_DPCA -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
+  # select PCs of interest
+  run_command "extract pcs 1-5+7" "$(awk '{print $1, $2, $3, $4, $5, $7}' $TRAJ_DPCA > $TRAJ_SEL)"
+  cd ../
+  cleanup_if_failed && printf "\n"
+
+
+  ### RUN CLUSTERING ##########################################################
+  pheader "RUN ROBUST CLUSTERING"
+  mkdir clustering && cd clustering
+  run_command "estimate free energy" "$CLUSTERING density -f $TRAJ_SEL -pop -d fe -b nn -v"
+  run_command "density screening" "$CLUSTERING density -f $TRAJ_SEL -T -1 -D fe -B nn -o cluster -v"
+  run_command "generating network" "$CLUSTERING network -p 128 -b cluster -v"
+  run_command "build microstate trajectory" "$CLUSTERING density -f $TRAJ_SEL -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_MS -v"
+  run_command "denoise microstate trajectory" "$CLUSTERING noise -s $TRAJ_MS -o ${TRAJ_MS}Noise -b cluster -v"
+  run_command "dynamical coring" "$CLUSTERING coring -s ${TRAJ_MS}Noise -w 15 -o ${TRAJ_MS}Final -v"
+  cd ../
+  cleanup_if_failed && printf "\n"
+
+
+  ### RENAME STATES ###########################################################
+  pheader "RENAMING STATES BY POPULATION"
+  cd clustering
+  run_command "shift state names" "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
+  run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
+  cd ../../
+  cleanup_if_failed && printf "\n"
+
+  pheader "DONE\n"
+  pprint "resulting ms traj: ${DIR}/microstates\n" "" ""
+}
+
+
+cleanup_if_failed() {
+  if [[ $return_val != 0 ]]; then
+    cd ..;
+    mkdir_ask $DIR
+    run_command "aborting and cleaning" "rm -fr $DIR"
+    printf "%s" "${reset}"
+    exit $return_val
+  fi
+}
+
+
+### HELPER FUNCTIONS ##########################################################
+# source helper functions
+. ../lib/helper_functions
+
+
+### ARGPARSING ################################################################
+showhelp() {
+  print_welcome
+  printf "usage: %s [-v] [-h]
+optinal arguments:
+    -v: verbose mode.
+    -h: show help.\n\n" "$0"
+}
+
+
+# Add all the parameter you whish, -h will show help and -d will
+# trigger debug messages to show up
+verbosity=0
+return_val=0
+while getopts ":hv" o; do
+  case "${o}" in
+    h)
+      showhelp
+      exit 0
+      ;;
+    v)
+      (( verbosity=verbosity+1 ))
+      ;;
+    *)
+      printf "Non valid option selected. Use -h for help.\n"
+      exit 1
+      ;;
+    esac
+done
+
+
+# run main
+main
+exit $return_val
