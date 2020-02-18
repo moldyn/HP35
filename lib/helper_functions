@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+
+### HELPER FUNCTIONS ##########################################################
+# define colors
+reset="$(tput sgr 0)"
+red="$(tput setaf 161)"
+blue="$(tput setaf 037)"
+orange="$(tput setaf 208)"
+green="$(tput setaf 044)"
+bold="$(tput bold)"
+clear="$(tput clear)"
+
+
+print_welcome() {
+  # reset tput
+  printf "%s" "${reset}"
+
+  printf "\n~~~ %s%s%s ~~~\n" "$bold" "ROBUST CLUSTERING BENCHMARK" "$reset"
+  printf "~~~ generating microstate trajectory with dpca+ and robust clustering\n"
+  printf "~~~ this script is part of %sHP35-Benchmark\n" "$MOLDYN_GIT"
+  printf "~~~ Copyright (c) 2020, Daniel Nagel\n"
+  printf "\n"
+}
+
+
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
+
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+printf_prefix() {
+  local _date=$(showdate)
+  local _level=""
+  case "$3" in
+    '1')
+      _level=" ↪ "
+      ;;
+    '2')
+      _level="    ↪ "
+      ;;
+  esac
+
+  if [ "$2" == "" ]; then
+    printf "[%s]%s " "$_date" "$_level"
+  else
+    printf "[%s]%s[%s%s%s%s] " "$_date" "$_level" "$bold" "$1" "$2" "$reset"
+  fi
+}
+
+
+pheader() {
+  printf "~~~~~~~~~ %s%s%s\n" "$bold" "$1" "$reset"
+}
+
+
+pprint() {
+    # $1 string to print
+    # $2 color of symbol
+    # $3 symbol
+    # $4 level of indent
+    prefix=$(printf_prefix "$2" "$3" "$4")
+    printf "%s%b" "$prefix" "$1"
+}
+
+
+perror() {
+    # see pprint
+    prefix=$(printf_prefix "$2" "$3" "$4")
+    printf "%s%b" "$prefix" "$1" 1>&2
+}
+
+
+warn() {
+    pprint "$1" "$orange" "!" "$2"
+}
+
+
+run_command() {
+    # $1 string to print
+    # $2 string to execute
+    # $3 level of print, default 0
+    local _level=${3:-0}
+    pprint "$1" "" " " "$_level"
+
+    if [[ $verbosity != 0 ]]; then
+      printf "\n$ %s\n" "$2"
+      eval $2
+    else
+      eval $2 1>/dev/null 2>&1
+    fi
+    retval=$?
+
+    # check if failed
+    printf "\r"
+    if [[ $retval == 0 ]]; then
+      pprint "$1\n" "$green" "✔" "$_level"
+    else
+      perror "$1\n" "$red" "✘" "$_level"
+      # print only help if output was not suppressed
+      if [[ $2 != */dev/null* ]]; then
+        perror "Use -v for more information.\n" "" "" "$(($_level+1))"
+      fi
+      return_val=$((return_val+1))
+    fi
+}
+
+
+showdate() {
+  local _date
+  _date=$(date +%d-%H:%M)
+  printf "$_date"
+}
+
+
+mkdir_ask() {
+  if [ -d "$1" ]; then
+    warn "Do you wish to delete the directory:\n'$(pwd)/$1'\n"
+    select yn in "Yes" "No"; do
+      case $yn in
+        "Yes")
+          rm -fr $1;
+          break
+          ;;
+        "No")
+          exit
+          ;;
+        * ) echo "select 1 or 2";;
+      esac
+    done
+  fi
+  # create dir
+  mkdir $1
+}
