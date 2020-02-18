@@ -47,7 +47,8 @@ main() {
 
   ### COMPILE CLUSTERING ######################################################
   pheader "DOWNLOAD AND COMPILE ROBUST CLUSTERING"
-  run_command "clone ${MOLDYN_GIT}Clustering.git" "git clone ${MOLDYN_GIT}Clustering.git"
+  run_command "clone ${MOLDYN_GIT}Clustering.git" \
+              "git clone ${MOLDYN_GIT}Clustering.git"
   cd Clustering && mkdir build && cd build
   # todo allow gcc 5 for cuda < 9.2
   nvcc_ver=$(nvcc --version | grep -o -P '(?<=release ).*(?=, V)')
@@ -56,7 +57,8 @@ main() {
   else
     gcc_ver=5 
   fi
-  run_command "cmake" "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
+  run_command "cmake" \
+              "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
   run_command "make" "make"
   cd ../../
   cleanup_if_failed && printf "\n"
@@ -71,7 +73,8 @@ main() {
   else
     branch=""
   fi
-  run_command "clone ${MOLDYN_GIT}FASTPCA.git" "git clone ${branch}${MOLDYN_GIT}FastPCA.git"
+  run_command "clone ${MOLDYN_GIT}FASTPCA.git" \
+              "git clone ${branch}${MOLDYN_GIT}FastPCA.git"
   cd FastPCA && mkdir build && cd build
   run_command "cmake" "cmake .."
   run_command "make" "make"
@@ -81,7 +84,8 @@ main() {
 
   ### DOWNLOAD HP35 BENCHMARK TRAJECTORY ######################################
   pheader "DOWNLOAD HP35 BENCHMARK TRAJECTORY"
-  run_command "clone ${MOLDYN_GIT}HP35-DESRES.git" "git clone ${MOLDYN_GIT}HP35-DESRES.git"
+  run_command "clone ${MOLDYN_GIT}HP35-DESRES.git" \
+              "git clone ${MOLDYN_GIT}HP35-DESRES.git"
   cd HP35-DESRES
   run_command "unzip trajectory" "bunzip2 -k traj.dat.bz2"
   cd ../
@@ -91,9 +95,11 @@ main() {
   ### RUN DPCA+ ###############################################################
   pheader "RUN DPCA+"
   mkdir dpca && cd dpca
-  run_command "perform pca" "$FASTPCA -f $TRAJ_DIH -P -p $TRAJ_DPCA -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
+  run_command "perform pca" \
+              "$FASTPCA -f $TRAJ_DIH -P -p $TRAJ_DPCA -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
   # select PCs of interest
-  run_command "extract pcs 1-5+7" "$(awk '{print $1, $2, $3, $4, $5, $7}' $TRAJ_DPCA > $TRAJ_SEL)"
+  run_command "extract pcs 1-5+7" \
+              "$(awk '{print $1, $2, $3, $4, $5, $7}' $TRAJ_DPCA > $TRAJ_SEL)"
   cd ../
   cleanup_if_failed && printf "\n"
 
@@ -101,12 +107,18 @@ main() {
   ### RUN CLUSTERING ##########################################################
   pheader "RUN ROBUST CLUSTERING"
   mkdir clustering && cd clustering
-  run_command "estimate free energy" "$CLUSTERING density -f $TRAJ_SEL -pop -d fe -b nn -v"
-  run_command "density screening" "$CLUSTERING density -f $TRAJ_SEL -T -1 -D fe -B nn -o cluster -v"
-  run_command "generating network" "$CLUSTERING network -p 128 -b cluster -v"
-  run_command "build microstate trajectory" "$CLUSTERING density -f $TRAJ_SEL -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_MS -v"
-  run_command "denoise microstate trajectory" "$CLUSTERING noise -s $TRAJ_MS -o ${TRAJ_MS}Noise -b cluster -v"
-  run_command "dynamical coring" "$CLUSTERING coring -s ${TRAJ_MS}Noise -w 15 -o ${TRAJ_MS}Final -v"
+  run_command "estimate free energy" \
+              "$CLUSTERING density -f $TRAJ_SEL -pop -d fe -b nn -v"
+  run_command "density screening" \
+              "$CLUSTERING density -f $TRAJ_SEL -T -1 -D fe -B nn -o cluster -v"
+  run_command "generating network" \
+              "$CLUSTERING network -p 128 -b cluster -v"
+  run_command "build microstate trajectory" \
+              "$CLUSTERING density -f $TRAJ_SEL -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_MS -v"
+  run_command "denoise microstate trajectory" \
+              "$CLUSTERING noise -s $TRAJ_MS -o ${TRAJ_MS}Noise -b cluster -v"
+  run_command "dynamical coring" \
+              "$CLUSTERING coring -s ${TRAJ_MS}Noise -w 15 -o ${TRAJ_MS}Final -v"
   cd ../
   cleanup_if_failed && printf "\n"
 
@@ -114,7 +126,8 @@ main() {
   ### RENAME STATES ###########################################################
   pheader "RENAMING STATES BY POPULATION"
   cd clustering
-  run_command "shift state names" "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
+  run_command "shift state names" \
+              "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
   run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
   cd ../../
   cleanup_if_failed && printf "\n"
