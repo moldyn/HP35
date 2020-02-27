@@ -91,6 +91,15 @@ main() {
   cd ../
   cleanup_if_failed && printf "\n"
 
+  ### DEBUG
+  pprint "enter debugging mode\n" "$orange" "DEBUG"
+  cd HP35-DESRES
+  rm $TRAJ_DIH
+  ln -s /data/HP35_Daniel/villin_360K.dih $TRAJ_DIH
+  cd ../
+  pprint "leave debugging mode\n" "$orange" "DEBUG"
+  ### DEBUG
+
 
   ### RUN DPCA+ ###############################################################
   pheader "RUN DPCA+"
@@ -142,7 +151,7 @@ cleanup_if_failed() {
     cd ..;
     mkdir_ask $DIR
     run_command "aborting and cleaning" "rm -fr $DIR"
-    printf "%s" "${reset}"
+    printf "%b" "$reset"
     exit $return_val
   fi
 }
@@ -158,7 +167,8 @@ showhelp() {
   print_welcome
   printf "usage: %s [-v] [-h]
 optinal arguments:
-    -v: verbose mode.
+    -v: verbose mode (-vv for more).
+    -c: level of color (-cc for utf8).
     -h: show help.\n\n" "$0"
 }
 
@@ -167,7 +177,8 @@ optinal arguments:
 # trigger debug messages to show up
 verbosity=0
 return_val=0
-while getopts ":hv" o; do
+color_val=0
+while getopts ":hvc" o; do
   case "${o}" in
     h)
       showhelp
@@ -176,6 +187,9 @@ while getopts ":hv" o; do
     v)
       (( verbosity=verbosity+1 ))
       ;;
+    c)
+      (( color_val=color_val+1 ))
+      ;;
     *)
       printf "Non valid option selected. Use -h for help.\n"
       exit 1
@@ -183,6 +197,7 @@ while getopts ":hv" o; do
     esac
 done
 
+. ../lib/helper_functions $color_val
 
 # run main
 main
