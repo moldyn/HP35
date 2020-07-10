@@ -1,0 +1,3 @@
+[submodule "bash-template"]
+	path = bash-template
+	url = https://gitlab.com/braniii/bash-template
