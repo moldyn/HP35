@@ -60,7 +60,7 @@ main() {
   run_command "update pip" "pip install --upgrade pip"
   run_command "install dependencies" "pip install numpy pandas click"
   # todo: remove once uploaded to pypi
-  git clone https://github.com/moldyn/msmhelper.git && cd msmhelper && pip install -e .
+  git clone https://github.com/moldyn/msmhelper.git && cd msmhelper && pip install -e . && cd ..
   cleanup_if_failed
 
 
