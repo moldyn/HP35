@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
+### ROBUST CLUSTERING #########################################################
+# Reproduces the results of Nagel19 and show cases how to use the robust
+# clustering framework.
+#
+# If this script is used, please cite:
+# D. Nagel, A. Weber, B. Lickert and G. Stock, "Dynamical coring of Markov state
+# models" JCP 150, 094111, 2019; DOI: 10.1063/1.5081767
+#
+# Author: Daniel Nagel
+# Copyright (C) 2020, Daniel Nagel
+#
+# Arguments:
+#   h: show help
+#   v: set verbosity mode, the more consecutive 'v' the higher
+#   c: color_lvl - 0 none, 1 some, 2 utf8
+#
+###############################################################################
 
 ### CONSTANTS #################################################################
 # path
@@ -14,7 +31,7 @@ readonly CLUSTERING="../Clustering/build/clustering"
 readonly FASTPCA="../FastPCA/build/src/fastpca"
 
 # define requirements except of python venv
-declare -a requirements=("gcc" "nvcc" "git" "python3")
+declare -a requirements=("gcc" "nvcc" "git" "git-lfs" "python3")
 ### MAIN ######################################################################
 main() {
   # print welcome
@@ -33,16 +50,17 @@ main() {
     run_command "$req" "command -v $req >/dev/null 2>&1"
   done
   run_command "python venv" "python3 -m venv -h >/dev/null 2>&1"
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### SETUP PYTHON VENV #######################################################
+  # todo: add msmhelper click
   pheader "SETUP PYTHON VENV"
   run_command "create venv" "python3 -m venv Python"
   run_command "activate venv" ". Python/bin/activate"
   run_command "update pip" "pip install --upgrade pip"
   run_command "install dependencies" "pip install numpy pandas"
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### COMPILE CLUSTERING ######################################################
@@ -55,13 +73,13 @@ main() {
   if [[ ${nvcc_ver:0:1} > 8 && ${nvcc_ver:2:1} > 1 ]]; then
     gcc_ver=7
   else
-    gcc_ver=5 
+    gcc_ver=5
   fi
   run_command "cmake" \
               "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
   run_command "make" "make"
   cd ../../
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### COMPILE DPCA+ ###########################################################
@@ -79,7 +97,7 @@ main() {
   run_command "cmake" "cmake .."
   run_command "make" "make"
   cd ../../
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### DOWNLOAD HP35 BENCHMARK TRAJECTORY ######################################
@@ -89,16 +107,7 @@ main() {
   cd HP35-DESRES
   run_command "unzip trajectory" "bunzip2 -k traj.dat.bz2"
   cd ../
-  cleanup_if_failed && printf "\n"
-
-  ### DEBUG
-  pprint "enter debugging mode\n" "$orange" "DEBUG"
-  cd HP35-DESRES
-  rm $TRAJ_DIH
-  ln -s /data/HP35_Daniel/villin_360K.dih $TRAJ_DIH
-  cd ../
-  pprint "leave debugging mode\n" "$orange" "DEBUG"
-  ### DEBUG
+  cleanup_if_failed
 
 
   ### RUN DPCA+ ###############################################################
@@ -110,7 +119,7 @@ main() {
   run_command "extract pcs 1-5+7" \
               "$(awk '{print $1, $2, $3, $4, $5, $7}' $TRAJ_DPCA > $TRAJ_SEL)"
   cd ../
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### RUN CLUSTERING ##########################################################
@@ -129,7 +138,7 @@ main() {
   run_command "dynamical coring" \
               "$CLUSTERING coring -s ${TRAJ_MS}Noise -w 15 -o ${TRAJ_MS}Final -v"
   cd ../
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
 
   ### RENAME STATES ###########################################################
@@ -139,65 +148,51 @@ main() {
               "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
   run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
   cd ../../
-  cleanup_if_failed && printf "\n"
+  cleanup_if_failed
 
   pheader "DONE\n"
   pprint "resulting ms traj: ${DIR}/microstates\n" "" ""
 }
 
 
+### DEFINE LOCAL FUNCTIONS ####################################################
 cleanup_if_failed() {
   if [[ $return_val != 0 ]]; then
     cd ..;
-    mkdir_ask $DIR
-    run_command "aborting and cleaning" "rm -fr $DIR"
-    printf "%b" "$reset"
+    err "aborting and cleaning"
+    rmdir_ask $DIR
+    printf "%b\n" "$reset"
     exit $return_val
   fi
 }
 
+print_welcome() {
+  # reset font
+  printf "%b" "${reset}"
 
-### HELPER FUNCTIONS ##########################################################
-# source helper functions
-. ../lib/helper_functions
-
-
-### ARGPARSING ################################################################
-showhelp() {
-  print_welcome
-  printf "usage: %s [-v] [-h]
-optinal arguments:
-    -v: verbose mode (-vv for more).
-    -c: level of color (-cc for utf8).
-    -h: show help.\n\n" "$0"
+  # local _str=$(ptri "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
+  local _str=$(pbox "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
+  printf "\n%b%b\n" "$_str"
+  printf "generating microstate trajectory with dpca+ and robust clustering\n"
+  printf "this script is part of %sHP35-Benchmark\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2020, Daniel Nagel\n"
+  printf "\n"
 }
 
 
-# Add all the parameter you whish, -h will show help and -d will
-# trigger debug messages to show up
-verbosity=0
-return_val=0
-color_val=0
-while getopts ":hvc" o; do
-  case "${o}" in
-    h)
-      showhelp
-      exit 0
-      ;;
-    v)
-      (( verbosity=verbosity+1 ))
-      ;;
-    c)
-      (( color_val=color_val+1 ))
-      ;;
-    *)
-      printf "Non valid option selected. Use -h for help.\n"
-      exit 1
-      ;;
-    esac
-done
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
 
-. ../lib/helper_functions $color_val
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+### SOURCE BASH HELPER FUNCTIONS ##############################################
+. ../bash-template/libbash.sh -d "$@"
 
 # run main
 main
