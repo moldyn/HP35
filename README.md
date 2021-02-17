@@ -2,7 +2,7 @@
 # HP35-Benchmark
 Benchmarking dimensionality reduction methods and clustering on [HP35-DESRES](https://github.com/moldyn/HP35-DESRES).
 
-This is package automatizes the comparison of  different clustring and dimensionality reduction methods and its effects on the resulting Markov state models.
+This is package automatizes the comparison of  different clustring and dimensionality reduction methods and its effects on the resulting Markov state models. So far, only the result of Nagel et al. 19 are reproduced. Comparison methods will follow soon.
 
 If the provided scripts are used, please cite:
 - D. Nagel, A. Weber, B. Lickert and G. Stock, *Dynamical coring of Markov state models*, J. Chem. Phys., 150, 094111, 2019; DOI: [10.1063/1.5081767](https://aip.scitation.org/doi/10.1063/1.5081767)
@@ -18,6 +18,7 @@ Reproducing the published state trajectory can be achieved with
 ```bash
 cd clustering && bash robust_clustering
 ```
+Until our python package [msmhelper](https://moldyn.github.io/msmhelper) is available, the states are not renamed by their population.
 
 ## Add Own Routine
 For an example take a look at [robust_clustering](https://github.com/moldyn/HP35-Benchmark/blob/master/clustering/robust_clustering)
