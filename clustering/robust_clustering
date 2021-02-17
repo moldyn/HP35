@@ -60,7 +60,7 @@ main() {
   run_command "update pip" "pip install --upgrade pip"
   run_command "install dependencies" "pip install numpy pandas click"
   # todo: remove once uploaded to pypi
-  git clone https://github.com/moldyn/msmhelper.git && cd msmhelper && pip install -e . && cd ..
+  # git clone https://github.com/moldyn/msmhelper.git && cd msmhelper && pip install -e . && cd ..
   cleanup_if_failed
 
 
@@ -145,9 +145,10 @@ main() {
   ### RENAME STATES ###########################################################
   pheader "RENAMING STATES BY POPULATION"
   cd clustering
-  run_command "shift state names" \
-              "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
-  run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
+  #run_command "shift state names" \
+  #            "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
+  #run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
+  run_command "copy result" "cp ${TRAJ_MS}Final ../microstates"
   cd ../../
   cleanup_if_failed
 
