@@ -58,9 +58,7 @@ main() {
   run_command "create venv" "python3 -m venv Python"
   run_command "activate venv" ". Python/bin/activate"
   run_command "update pip" "pip install --upgrade pip"
-  run_command "install dependencies" "pip install numpy pandas click"
-  # todo: remove once uploaded to pypi
-  # git clone https://github.com/moldyn/msmhelper.git && cd msmhelper && pip install -e . && cd ..
+  run_command "install dependencies" "pip install numpy pandas click msmhelper"
   cleanup_if_failed
 
 
