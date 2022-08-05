@@ -143,10 +143,9 @@ main() {
   ### RENAME STATES ###########################################################
   pheader "RENAMING STATES BY POPULATION"
   cd clustering
-  #run_command "shift state names" \
-  #            "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
-  #run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
-  run_command "copy result" "cp ${TRAJ_MS}Final ../microstates"
+  run_command "shift state names" \
+              "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
+  run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
   cd ../../
   cleanup_if_failed
 
