@@ -34,7 +34,7 @@ readonly TRAJ_CONTACTS_PCA="../conpca/${TRAJ_CONTACTS_GAUSSIAN##*/}.proj"
 readonly TRAJ_CONTACTS_PCS="${TRAJ_CONTACTS_PCA}.1-5"
 readonly TRAJ_DIH_MS="../clustering_dihs/microstates"
 readonly TRAJ_CONTACTS_MS="../clustering_contacts/microstates"
-readonly DIR="robust_clustering_benchmark"
+readonly DIR="create_microstates_Nagel23"
 
 # define executables
 readonly CLUSTERING="../Clustering/build/clustering"
@@ -123,8 +123,8 @@ main() {
   ### APPLY GAUSSIAN FILTERING ################################################
   pheader "APPLY GAUSSIAN FILTERING WITH SIGMA=2NS"
   cd HP35-DESRES
-  run_command "smooth dihedrals" "python -m msmhelper gaussian-filtering -i ${TRAJ_DIH} -s $GAUSSIANSIGMA -o ${TRAJ_DIH_GAUSSIAN}"
-  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${TRAJ_CONTACTS} -s $GAUSSIANSIGMA -o ${TRAJ_CONTACTS_GAUSSIAN}"
+  run_command "smooth dihedrals" "python -m msmhelper gaussian-filtering -i ${TRAJ_DIH} -s $SIGMA -o ${TRAJ_DIH_GAUSSIAN}"
+  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${TRAJ_CONTACTS} -s $SIGMA -o ${TRAJ_CONTACTS_GAUSSIAN}"
   cd ../
   cleanup_if_failed
 
