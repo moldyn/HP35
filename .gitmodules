@@ -1,7 +1,6 @@
 [submodule "bash-template"]
 	path = bash-template
 	url = https://gitlab.com/braniii/bash-template
-
 [submodule "HP35-DESRES"]
 	path = HP35-DESRES
 	url = https://github.com/moldyn/HP35-DESRES
