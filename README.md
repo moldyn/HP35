@@ -1,24 +1,42 @@
-[![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
-# HP35-Benchmark
-Benchmarking dimensionality reduction methods and clustering on [HP35-DESRES](https://github.com/moldyn/HP35-DESRES).
+# Selecting Features for Markov Modeling: A Case Study on HP35
+This repository provides all scripts and intermediate steps to generate the
+reproduce the analysis of Nagel et al. 2023. If the provided scripts/files are
+used, please cite:
+> D. Nagel, S. Sartore, and G. Stock,  
+> *Selecting Features for Markov Modeling: A Case Study on HP35*,  
+> J. Chem. Theory Comput., submitted;  
+> doi: [xx.xxxx/x.xxxxxxx](https://aip.scitation.org/doi/xx.xxxx/x.xxxxxxx)
 
-This is package automatizes the comparison of  different clustring and dimensionality reduction methods and its effects on the resulting Markov state models. So far, only the result of Nagel et al. 19 are reproduced. Comparison methods will follow soon.
+## Getting Started
+To download all included submodules, please clone this repository with
+```bash
+git clone --recurse-submodules git@github.com:moldyn/HP35.git
+cd HP35
+```
+## Intermediate Steps
+### Features: Backbone Dihedral Angles and Minimal Contact Distances
+In the directory `HP35-DESRES` you can find
+1. `hp35.dihs`: backbone dihedral angels given [degrees]
+1. `hp35.dihs.shifted`: maximum-gap shifted backbone dihedral angels [rad]
+1. `hp35.crystaldists`: the atom distances of all contacts occurring in the crystal structure 2f4k [nm]
+1. `hp35.mindists`: all minimal distances occurring more frequently than 30% [nm]
+1. `hp35.mindists2`: improved distances definition with all atom pairwise distances occurring more frequently than 30% [nm]
+for more details take a look at the [README](HP35-DESRES/README.md).
 
-If the provided scripts are used, please cite:
-- D. Nagel, A. Weber, B. Lickert and G. Stock, *Dynamical coring of Markov state models*, J. Chem. Phys., 150, 094111, 2019; DOI: [10.1063/1.5081767](https://aip.scitation.org/doi/10.1063/1.5081767)
+### Principal Components
 
-## Getting ready
+### Microstate Trajectories
+
+
+## Reproducing the Results
+### Getting Started
 Simply clone this repository with
 ```bash
-git clone --recurse-submodules git://github.com/moldyn/HP35-Benchmark.git
-cd HP35-Benchmark
+git clone --recurse-submodules git@github.com:moldyn/HP35.git
+cd HP35
 ```
-
-Reproducing the published state trajectory can be achieved with
+### Reproducing the Microstate Trajectories
+Reproducing the published microstate trajectories can be achieved with
 ```bash
-cd clustering && bash robust_clustering
+cd clustering && bash robust_clustering -c1
 ```
-Until our python package [msmhelper](https://moldyn.github.io/msmhelper) is available, the states are not renamed by their population.
-
-## Add Own Routine
-For an example take a look at [robust_clustering](https://github.com/moldyn/HP35-Benchmark/blob/master/clustering/robust_clustering)
