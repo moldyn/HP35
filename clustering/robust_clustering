@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 ### ROBUST CLUSTERING #########################################################
-# Reproduces the results of Nagel19 and show cases how to use the robust
+# Reproduces the results of Nagel23 and show cases how to use the robust
 # clustering framework.
 #
 # If this script is used, please cite:
-# D. Nagel, A. Weber, B. Lickert and G. Stock, "Dynamical coring of Markov state
-# models" JCP 150, 094111, 2019; DOI: 10.1063/1.5081767
+# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
+# Case Study on HP35" J. Chem. Theory Comput., submitted
 #
 # Author: Daniel Nagel
-# Copyright (C) 2020, Daniel Nagel
+# Copyright (C) 2023, Daniel Nagel
 #
 # Arguments:
 #   h: show help
@@ -18,12 +18,22 @@
 ###############################################################################
 
 ### CONSTANTS #################################################################
-# path
+# variables
+readonly SIGMA="10"
+readonly PMIN="153"
+
+# paths
 readonly MOLDYN_GIT="https://github.com/moldyn/"
-readonly TRAJ_DIH="../HP35-DESRES/traj.dat"
-readonly TRAJ_DPCA="../dpca/traj.proj"
-readonly TRAJ_SEL="../dpca/traj.proj.1-5_7"
-readonly TRAJ_MS="../clustering/microstates"
+readonly TRAJ_DIH="../HP35-DESRES/hp35.dihs.shifted"
+readonly TRAJ_CONTACTS="../HP35-DESRES/hp35.mindists2"
+readonly TRAJ_DIH_GAUSSIAN="${TRAJ_DIH}.gaussian${SIGMA}f"
+readonly TRAJ_CONTACTS_GAUSSIAN="${TRAJ_CONTACTS}.gaussian${SIGMA}f"
+readonly TRAJ_DIH_PCA="../dpca/${TRAJ_DIH_GAUSSIAN##*/}.proj"
+readonly TRAJ_DIH_PCS="${TRAJ_DIH_PCA}.1-4"
+readonly TRAJ_CONTACTS_PCA="../conpca/${TRAJ_CONTACTS_GAUSSIAN##*/}.proj"
+readonly TRAJ_CONTACTS_PCS="${TRAJ_CONTACTS_PCA}.1-5"
+readonly TRAJ_DIH_MS="../clustering_dihs/microstates"
+readonly TRAJ_CONTACTS_MS="../clustering_contacts/microstates"
 readonly DIR="robust_clustering_benchmark"
 
 # define executables
@@ -104,53 +114,72 @@ main() {
   run_command "clone ${MOLDYN_GIT}HP35-DESRES.git" \
               "git clone ${MOLDYN_GIT}HP35-DESRES.git"
   cd HP35-DESRES
-  run_command "unzip trajectory" "bunzip2 -k traj.dat.bz2"
+  run_command "unzip dihedral trajectory" "bunzip2 -k ${TRAJ_DIH}.bz2"
+  run_command "unzip contacts trajectory" "bunzip2 -k ${TRAJ_CONTACTS}.bz2"
+  cd ../
+  cleanup_if_failed
+
+
+  ### APPLY GAUSSIAN FILTERING ################################################
+  pheader "APPLY GAUSSIAN FILTERING WITH SIGMA=2NS"
+  cd HP35-DESRES
+  run_command "smooth dihedrals" "python -m msmhelper gaussian-filtering -i ${TRAJ_DIH} -s $GAUSSIANSIGMA -o ${TRAJ_DIH_GAUSSIAN}"
+  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${TRAJ_CONTACTS} -s $GAUSSIANSIGMA -o ${TRAJ_CONTACTS_GAUSSIAN}"
   cd ../
   cleanup_if_failed
 
 
   ### RUN DPCA+ ###############################################################
-  pheader "RUN DPCA+"
+  pheader "RUN DPCA+ on dihedrals"
   mkdir dpca && cd dpca
   run_command "perform pca" \
-              "$FASTPCA -f $TRAJ_DIH -P -p $TRAJ_DPCA -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
+              "$FASTPCA -f $TRAJ_DIH_GAUSSIAN -p $TRAJ_DIH_PCA -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
   # select PCs of interest
-  run_command "extract pcs 1-5+7" \
-              "$(awk '{print $1, $2, $3, $4, $5, $7}' $TRAJ_DPCA > $TRAJ_SEL)"
+  run_command "extract pcs 1-4" \
+              "$(awk '{print $1, $2, $3, $4}' $TRAJ_DIH_PCA > $TRAJ_DIH_PCS)"
+  cd ../
+  cleanup_if_failed
+
+
+  ### RUN conPCA ##############################################################
+  pheader "RUN conPCA on contacts"
+  mkdir conpca && cd conpca
+  run_command "perform pca" \
+              "$FASTPCA -f $TRAJ_CONTACTS_GAUSSIAN -N -p $TRAJ_CONTACTS_PCA -c traj.corr -v traj.vec -s traj.stats -l traj.val --verbose"
+  # select PCs of interest
+  run_command "extract pcs 1-5" \
+              "$(awk '{print $1, $2, $3, $4, $5}' $TRAJ_CONTACTS_PCA > $TRAJ_CONTACTS_PCS)"
   cd ../
   cleanup_if_failed
 
 
   ### RUN CLUSTERING ##########################################################
-  pheader "RUN ROBUST CLUSTERING"
-  mkdir clustering && cd clustering
+  pheader "RUN ROBUST CLUSTERING ON DIHEDRALS"
+  mkdir clustering_dihs && cd clustering_dihs
   run_command "estimate free energy" \
-              "$CLUSTERING density -f $TRAJ_SEL -pop -d fe -b nn -v"
+              "$CLUSTERING density -f $TRAJ_DIH_PCS -pop -d fe -b nn -v"
   run_command "density screening" \
-              "$CLUSTERING density -f $TRAJ_SEL -T -1 -D fe -B nn -o cluster -v"
+              "$CLUSTERING density -f $TRAJ_DIH_PCS -T -1 -D fe -B nn -o cluster -v"
   run_command "generating network" \
-              "$CLUSTERING network -p 128 -b cluster -v"
+              "$CLUSTERING network -p $PMIN -b cluster -v"
   run_command "build microstate trajectory" \
-              "$CLUSTERING density -f $TRAJ_SEL -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_MS -v"
-  run_command "denoise microstate trajectory" \
-              "$CLUSTERING noise -s $TRAJ_MS -o ${TRAJ_MS}Noise -b cluster -v"
-  run_command "dynamical coring" \
-              "$CLUSTERING coring -s ${TRAJ_MS}Noise -w 15 -o ${TRAJ_MS}Final -v"
+              "$CLUSTERING density -f $TRAJ_DIH_PCS -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_DIH_MS -v"
   cd ../
   cleanup_if_failed
 
 
-  ### RENAME STATES ###########################################################
-  pheader "RENAMING STATES BY POPULATION"
-  cd clustering
-  run_command "shift state names" \
-              "python3 ../../../rename_by_population.py -f ${TRAJ_MS}Final"
-  run_command "copy result" "cp ${TRAJ_MS}FinalSorted ../microstates"
-  cd ../../
+  pheader "RUN ROBUST CLUSTERING ON CONTACTS"
+  mkdir clustering_contacts && cd clustering_contacts
+  run_command "estimate free energy" \
+              "$CLUSTERING density -f $TRAJ_CONTACTS_PCS -pop -d fe -b nn -v"
+  run_command "density screening" \
+              "$CLUSTERING density -f $TRAJ_CONTACTS_PCS -T -1 -D fe -B nn -o cluster -v"
+  run_command "generating network" \
+              "$CLUSTERING network -p $PMIN -b cluster -v"
+  run_command "build microstate trajectory" \
+              "$CLUSTERING density -f $TRAJ_CONTACTS_PCS -i network_end_node_traj.dat -D fe -B nn -o $TRAJ_CONTACTS_MS -v"
+  cd ../
   cleanup_if_failed
-
-  pheader "DONE\n"
-  pprint "resulting ms traj: ${DIR}/microstates\n" "" ""
 }
 
 
@@ -172,9 +201,9 @@ print_welcome() {
   # local _str=$(ptri "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
   local _str=$(pbox "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
   printf "\n%b%b\n" "$_str"
-  printf "generating microstate trajectory with dpca+ and robust clustering\n"
-  printf "this script is part of %sHP35-Benchmark\n" "$MOLDYN_GIT"
-  printf "Copyright (c) 2020, Daniel Nagel\n"
+  printf "generating microstate trajectories of Nagel23 using backbone\n"
+  printf "dihedral angles and contact distances.\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2023, Daniel Nagel\n"
   printf "\n"
 }
 
