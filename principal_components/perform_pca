@@ -144,8 +144,8 @@ main() {
   cleanup_if_failed
 
   pheader "FINISHED"
-  run_command "link dihedrals pcs" "ln -s $DIHS_PCS ."
-  run_command "link contacts pcs" "ln -s $CONS_PCS ."
+  run_command "link dihedrals pcs" "ln -s ${DIHS_PCS#*../} ."
+  run_command "link contacts pcs" "ln -s ${CONS_PCS#*../} ."
   pprint "the final files can be find linked in root directory\n"
 }
 
