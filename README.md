@@ -16,17 +16,21 @@ cd HP35
 ## Create States
 ### Features: Backbone Dihedral Angles and Minimal Contact Distances
 In the directory `HP35-DESRES` you can find
+
 1. `hp35.dihs`: backbone dihedral angels given [degrees]
 1. `hp35.dihs.shifted`: maximum-gap shifted backbone dihedral angels [rad]
 1. `hp35.crystaldists`: the atom distances of all contacts occurring in the crystal structure 2f4k [nm]
 1. `hp35.mindists`: all minimal distances occurring more frequently than 30% [nm]
 1. `hp35.mindists2`: improved distances definition with all atom pairwise distances occurring more frequently than 30% [nm]
-for more details take a look at the [README](HP35-DESRES/README.md).
+
+For more details take a look at the [README](HP35-DESRES/README.md).
 
 ### Principal Components
 In the directory `PCA` you can find the resulting principal component projections
+
 1. `hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4`
 1. `hp35.mindists2.gaussian10f.proj.1-5`
+
 Furthermore you can find script to reproduce them.
 
 ### Microstate Trajectories
