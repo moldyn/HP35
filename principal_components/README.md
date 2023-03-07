@@ -7,11 +7,11 @@ Here we want to briefly summarize how the two files were generated. For a more i
 
 - `hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4`
     1. Discarding angles of residue 2 and 34, $\phi_2, \psi_2, \phi_{34}, \psi_{34}$
-    1. Apply Gaussian filtering with $\sigma=2\:\text{ns}$
+    1. Apply Gaussian filtering with $\sigma=2\text{ns}$
     1. Perform PCA, here we do not need using dPCA+ because the dihedrals are already maximal gap shifted
     1. Extract first 4 PCs
 - `hp35.mindists2.gaussian10f.proj.1-5`
-    1. Apply Gaussian filtering with $\sigma=2\:\text{ns}$
+    1. Apply Gaussian filtering with $\sigma=2\text{ns}$
     1. Perform conPCA
     1. Extract first 5 PCs
 
