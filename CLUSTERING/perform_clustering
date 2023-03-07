@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+### ROBUST CLUSTERING #########################################################
+# Reproduces the results of Nagel23 and show cases how to use the robust
+# clustering framework.
+#
+# If this script is used, please cite:
+# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
+# Case Study on HP35" J. Chem. Theory Comput., submitted
+#
+# Author: Daniel Nagel
+# Copyright (C) 2023, Daniel Nagel
+#
+# Arguments:
+#   h: show help
+#   v: set verbosity mode, the more consecutive 'v' the higher
+#   c: color_lvl - 0 none, 1 some, 2 utf8
+#
+###############################################################################
+
+### CONSTANTS #################################################################
+# variables
+readonly SIGMA="10"
+readonly PMIN="153"
+
+# paths
+
+readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly PCA_DIR="../../PCA"
+readonly DIHS_PCS="${PCA_DIR}/hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4"
+readonly CONTS_PCS="${PCA_DIR}/hp35.mindists2.gaussian10f.proj.1-5"
+readonly DIHS_BASENAME="${DIHS_PCS##*/}"
+readonly CONS_BASENAME="${CONS_PCS##*/}"
+readonly DIHS_MS="../clustering_dihs/${DIHS_BASENAME%.proj*}_microstates_pcs4_p${PMIN}"
+readonly CONS_MS="../clustering_cons/${CONS_BASENAME%.proj*}_microstates_pcs5_p${PMIN}"
+readonly DIR="create_microstates_nagel23"
+
+# define executables
+readonly CLUSTERING="../Clustering/build/clustering"
+
+# define requirements except of python venv
+declare -a requirements=("gcc" "nvcc" "git" "git-lfs")
+### MAIN ######################################################################
+main() {
+  # print welcome
+  print_welcome
+
+  # print user info and warning
+  print_info
+
+  # remove dir if existing
+  mkdir_ask $DIR
+  cd $DIR
+  printf "\n"
+
+  pheader "CHECK REQUIREMENTS"
+  for req in "${requirements[@]}"; do
+    run_command "$req" "command -v $req >/dev/null 2>&1"
+  done
+  cleanup_if_failed
+
+
+  ### CHECK IF PCS FILE EXISTS ################################################
+  pheader "CHECK PCA FILES"
+  if [[ ! -f $DIHS_PCS ]]; then
+    run_command "dihedral pcs are missing" "echo 1"
+  else
+    run_command "dihedral pcs exists" "echo 0"
+  fi
+  if [[ ! -f $CONS_PCS ]]; then
+    run_command "contacts pcs are missing" "echo 1"
+  else
+    run_command "contacts pcs exists" "echo 0"
+  fi
+  cleanup_if_failed
+
+
+  ### COMPILE CLUSTERING ######################################################
+  pheader "DOWNLOAD AND COMPILE ROBUST CLUSTERING"
+  run_command "clone ${MOLDYN_GIT}Clustering.git" \
+              "git clone ${MOLDYN_GIT}Clustering.git"
+  cd Clustering && mkdir build && cd build
+  # todo allow gcc 5 for cuda < 9.2
+  nvcc_ver=$(nvcc --version | grep -o -P '(?<=release ).*(?=, V)')
+  if [[ ${nvcc_ver:0:1} > 8 && ${nvcc_ver:2:1} > 1 ]]; then
+    gcc_ver=7
+  else
+    gcc_ver=5
+  fi
+  run_command "cmake" \
+              "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
+  run_command "make" "make"
+  cd ../../
+  cleanup_if_failed
+
+
+  ### RUN CLUSTERING ##########################################################
+  pheader "RUN ROBUST CLUSTERING ON DIHEDRALS"
+  mkdir clustering_dihs && cd clustering_dihs
+  run_command "estimate free energy" \
+              "$CLUSTERING density -f ../${DIHS_PCS} -pop -d fe -b nn -v"
+  run_command "density screening" \
+              "$CLUSTERING density -f ../${DIHS_PCS} -T -1 -D fe -B nn -o cluster -v"
+  run_command "generating network" \
+              "$CLUSTERING network -p $PMIN -b cluster -v"
+  run_command "build microstate trajectory" \
+              "$CLUSTERING density -f ../${DIHS_PCS} -i network_end_node_traj.dat -D fe -B nn -o $DIHS_MS -v"
+  cd ../
+  cleanup_if_failed
+
+
+  pheader "RUN ROBUST CLUSTERING ON CONTACTS"
+  mkdir clustering_cons && cd clustering_cons
+  run_command "estimate free energy" \
+              "$CLUSTERING density -f ../${CONS_PCS} -pop -d fe -b nn -v"
+  run_command "density screening" \
+              "$CLUSTERING density -f ../${CONS_PCS} -T -1 -D fe -B nn -o cluster -v"
+  run_command "generating network" \
+              "$CLUSTERING network -p $PMIN -b cluster -v"
+  run_command "build microstate trajectory" \
+              "$CLUSTERING density -f ../${CONS_PCS} -i network_end_node_traj.dat -D fe -B nn -o $CONS_MS -v"
+  cd ../
+  cleanup_if_failed
+
+
+  ### LINK FINALE FILES  ######################################################
+  pheader "FINISHED"
+  run_command "link dihedral-based microstates" "ln -s ${DIHS_MS#*../} ."
+  run_command "link contact-based microstates" "ln -s ${CONS_MS#*../} ."
+  pprint "the final files can be find linked in root directory\n"
+
+}
+
+
+### DEFINE LOCAL FUNCTIONS ####################################################
+cleanup_if_failed() {
+  if [[ $return_val != 0 ]]; then
+    cd ..;
+    err "aborting and cleaning"
+    rmdir_ask $DIR
+    printf "%b\n" "$reset"
+    exit $return_val
+  fi
+}
+
+print_welcome() {
+  # reset font
+  printf "%b" "${reset}"
+
+  # local _str=$(ptri "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
+  local _str=$(pbox "${bold}~~~ ROBUST CLUSTERING BENCHMARK ~~~" "$blue")
+  printf "\n%b%b\n" "$_str"
+  printf "generating microstate trajectories of Nagel23 using backbone\n"
+  printf "dihedral angles and contact distances.\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2023, Daniel Nagel\n"
+  printf "\n"
+}
+
+
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
+
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+### SOURCE BASH HELPER FUNCTIONS ##############################################
+. ../bash-template/libbash.sh -d "$@"
+
+# run main
+main
+exit $return_val
