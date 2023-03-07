@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+### ROBUST CLUSTERING #########################################################
+# Reproduces the results of Nagel23 and show cases how to use the robust
+# clustering framework.
+#
+# If this script is used, please cite:
+# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
+# Case Study on HP35" J. Chem. Theory Comput., submitted
+#
+# Author: Daniel Nagel
+# Copyright (C) 2023, Daniel Nagel
+#
+# Arguments:
+#   h: show help
+#   v: set verbosity mode, the more consecutive 'v' the higher
+#   c: color_lvl - 0 none, 1 some, 2 utf8
+#
+###############################################################################
+
+### CONSTANTS #################################################################
+# variables
+readonly SIGMA="10"
+
+# paths
+readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly DESRES="../../HP35-DESRES"
+readonly DIHS="${DESRES}/hp35.dihs.shifted"
+readonly DIHS_FILTERED="${TRAJ_DIH##*/}.res3-33"
+readonly CONS="${DESRES}/hp35.mindists2"
+readonly DIHS_GAUSSIAN="../${DIHS_FILTERED##*/}.gaussian${SIGMA}f"
+readonly CONS_GAUSSIAN="../${CONS##*/}.gaussian${SIGMA}f"
+readonly DIHS_PROJ="../dpca/${DIHS_GAUSSIAN##*/}.proj"
+readonly DIHS_PCS="${DIHS_PROJ}.1-4"
+readonly CONS_PROJ="../conpca/${CONS_GAUSSIAN##*/}.proj"
+readonly CONS_PCS="${CONS_PROJ}.1-5"
+readonly DIR="create_pca_nagel23"
+
+# define executables
+readonly FASTPCA="../FastPCA/build/src/fastpca"
+
+# define requirements except of python venv
+declare -a requirements=("gcc" "nvcc" "git" "git-lfs" "python3" "awk")
+### MAIN ######################################################################
+main() {
+  # print welcome
+  print_welcome
+
+  # print user info and warning
+  print_info
+
+  # remove dir if existing
+  mkdir_ask $DIR
+  cd $DIR
+  printf "\n"
+
+  pheader "CHECK REQUIREMENTS"
+  for req in "${requirements[@]}"; do
+    run_command "$req" "command -v $req >/dev/null 2>&1"
+  done
+  run_command "python venv" "python3 -m venv -h >/dev/null 2>&1"
+  cleanup_if_failed
+
+
+  ### SETUP PYTHON VENV #######################################################
+  pheader "SETUP PYTHON VENV"
+  run_command "create venv" "python3 -m venv Python"
+  run_command "activate venv" ". Python/bin/activate"
+  run_command "update pip" "pip install --upgrade pip"
+  run_command "install dependencies" "pip install msmhelper"
+  cleanup_if_failed
+
+
+  ### COMPILE DPCA+ ###########################################################
+  pheader "DOWNLOAD AND COMPILE DPC+"
+  # get gcc version for selecting correct branch
+  gcc_ver=$(gcc -dumpversion)
+  if [[ ${gcc_ver} -ge 10 ]]; then
+    branch="--branch fix_gcc10 "
+  elif [[ ${gcc_ver} -ge 8 ]]; then
+    branch="--branch fix_gcc8 "
+  else
+    branch=""
+  fi
+  run_command "clone ${MOLDYN_GIT}FASTPCA.git" \
+              "git clone ${branch}${MOLDYN_GIT}FastPCA.git"
+  cd FastPCA && mkdir build && cd build
+  run_command "cmake" "cmake .."
+  run_command "make" "make"
+  cd ../../
+  cleanup_if_failed
+
+
+  ### DOWNLOAD HP35 BENCHMARK TRAJECTORY ######################################
+  pheader "EXTRACT HP35"
+  if [[ ! -f $DIHS ]]; then
+    run_command "check dihedral archive" "bunzip2 -t ${DIHS}.bz2 &>/dev/null"
+    run_command "extract dihedral file" "bunzip2 -k ${DIHS}"
+  else
+    pprint "dihedrals are extracted all ready"
+  fi
+  if [[ ! -f $CONS ]]; then
+    run_command "check contacts archive" "bunzip2 -t ${CONS}.bz2 &>/dev/null"
+    run_command "extract contacts file" "bunzip2 -k ${CONS}"
+  else
+    pprint "contacts are extracted all ready"
+  fi
+  cleanup_if_failed
+
+
+  ### DISCARD FIRST AND LAST TWO RESIDUES #####################################
+  pheader "EXCLUDE DIHEDRAL ANGLES OF RES 2 AND RES 34"
+  run_command "exclude angles of res 2+34" "awk '{for (i=3; i<=NF-2;i++) print $i}' ${DIHS#*../} > $DIHS_FILTERED"
+  cleanup_if_failed
+
+
+  ### APPLY GAUSSIAN FILTERING ################################################
+  pheader "APPLY GAUSSIAN FILTERING WITH SIGMA=2NS"
+  run_command "smooth dihedrals" "python -m msmhelper gaussian-filtering -i ${DIHS_FILTERED} -s $SIGMA -o ${DIHS_GAUSSIAN##*/}"
+  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${CONS#*../} -s $SIGMA -o ${CONS_GAUSSIAN##*/}"
+  cleanup_if_failed
+
+
+  ### RUN DPCA+ ###############################################################
+  pheader "RUN DPCA+ ON DIHEDRALS"
+  mkdir dpca && cd dpca
+  run_command "perform pca" \
+              "$FASTPCA -f $DIHS_GAUSSIAN -p $DIHS_PROJ -c traj.cov -v traj.vec -s traj.stats -l traj.val --verbose"
+  # select PCs of interest
+  run_command "extract pcs 1-4" \
+              "$(awk '{print $1, $2, $3, $4}' $DIHS_PROJ > $DIHS_PCS)"
+  cd ../
+  cleanup_if_failed
+
+
+  ### RUN conPCA ##############################################################
+  pheader "RUN CONPCA ON CONTACTS"
+  mkdir conpca && cd conpca
+  run_command "perform pca" \
+              "$FASTPCA -f $CONS_GAUSSIAN -N -p $CONS_PROJ -c traj.corr -v traj.vec -s traj.stats -l traj.val --verbose"
+  # select PCs of interest
+  run_command "extract pcs 1-5" \
+              "$(awk '{print $1, $2, $3, $4, $5}' $CONS_PROJ > $CONS_PCS)"
+  cd ../
+  cleanup_if_failed
+
+  pheader "FINISHED"
+  run_command "link dihedrals pcs" "ln -s $DIHS_PCS ."
+  run_command "link contacts pcs" "ln -s $CONS_PCS ."
+  pprint "the final files can be find linked in root directory\n"
+}
+
+
+### DEFINE LOCAL FUNCTIONS ####################################################
+cleanup_if_failed() {
+  if [[ $return_val != 0 ]]; then
+    cd ..;
+    err "aborting and cleaning"
+    rmdir_ask $DIR
+    printf "%b\n" "$reset"
+    exit $return_val
+  fi
+}
+
+print_welcome() {
+  # reset font
+  printf "%b" "${reset}"
+
+  local _str=$(pbox "${bold}~~~ PRINCIPAL COMPONENTS ~~~" "$blue")
+  printf "\n%b%b\n" "$_str"
+  printf "generating principal components trajectories of Nagel23 using\n"
+  printf "backbone dihedral angles and contact distances.\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2023, Daniel Nagel\n"
+  printf "\n"
+}
+
+
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
+
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+### SOURCE BASH HELPER FUNCTIONS ##############################################
+. ../bash-template/libbash.sh -d "$@"
+
+# run main
+main
+exit $return_val
