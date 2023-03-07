@@ -25,7 +25,7 @@ readonly SIGMA="10"
 readonly MOLDYN_GIT="https://github.com/moldyn/"
 readonly DESRES="../../HP35-DESRES"
 readonly DIHS="${DESRES}/hp35.dihs.shifted"
-readonly DIHS_FILTERED="${TRAJ_DIH##*/}.res3-33"
+readonly DIHS_FILTERED="${DIHS##*/}.res3-33"
 readonly CONS="${DESRES}/hp35.mindists2"
 readonly DIHS_GAUSSIAN="../${DIHS_FILTERED##*/}.gaussian${SIGMA}f"
 readonly CONS_GAUSSIAN="../${CONS##*/}.gaussian${SIGMA}f"
@@ -39,7 +39,7 @@ readonly DIR="create_pca_nagel23"
 readonly FASTPCA="../FastPCA/build/src/fastpca"
 
 # define requirements except of python venv
-declare -a requirements=("gcc" "nvcc" "git" "git-lfs" "python3" "awk")
+declare -a requirements=("gcc" "nvcc" "git" "git-lfs" "python3" "cut" "bunzip2")
 ### MAIN ######################################################################
 main() {
   # print welcome
@@ -94,29 +94,29 @@ main() {
   pheader "EXTRACT HP35"
   if [[ ! -f $DIHS ]]; then
     run_command "check dihedral archive" "bunzip2 -t ${DIHS}.bz2 &>/dev/null"
-    run_command "extract dihedral file" "bunzip2 -k ${DIHS}"
+    run_command "extract dihedral file" "bunzip2 -k ${DIHS}.bz2"
   else
-    pprint "dihedrals are extracted all ready"
+    run_command "dihedrals are all ready extracted" "echo 0"
   fi
   if [[ ! -f $CONS ]]; then
     run_command "check contacts archive" "bunzip2 -t ${CONS}.bz2 &>/dev/null"
-    run_command "extract contacts file" "bunzip2 -k ${CONS}"
+    run_command "extract contacts file" "bunzip2 -k ${CONS}.bz2"
   else
-    pprint "contacts are extracted all ready"
+    run_command "contacts are all ready extracted" "echo 0"
   fi
   cleanup_if_failed
 
 
   ### DISCARD FIRST AND LAST TWO RESIDUES #####################################
   pheader "EXCLUDE DIHEDRAL ANGLES OF RES 2 AND RES 34"
-  run_command "exclude angles of res 2+34" "awk '{for (i=3; i<=NF-2;i++) print $i}' ${DIHS#*../} > $DIHS_FILTERED"
+  run_command "exclude angles of res 2+34" "cut -d ' ' -f 3-64 $DIHS > $DIHS_FILTERED"
   cleanup_if_failed
 
 
   ### APPLY GAUSSIAN FILTERING ################################################
   pheader "APPLY GAUSSIAN FILTERING WITH SIGMA=2NS"
   run_command "smooth dihedrals" "python -m msmhelper gaussian-filtering -i ${DIHS_FILTERED} -s $SIGMA -o ${DIHS_GAUSSIAN##*/}"
-  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${CONS#*../} -s $SIGMA -o ${CONS_GAUSSIAN##*/}"
+  run_command "smooth contacts" "python -m msmhelper gaussian-filtering -i ${CONS} -s $SIGMA -o ${CONS_GAUSSIAN##*/}"
   cleanup_if_failed
 
 
