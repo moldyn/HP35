@@ -143,6 +143,8 @@ main() {
   cd ../
   cleanup_if_failed
 
+
+  ### LINK FINALE FILES  ######################################################
   pheader "FINISHED"
   run_command "link dihedrals pcs" "ln -s ${DIHS_PCS#*../} ."
   run_command "link contacts pcs" "ln -s ${CONS_PCS#*../} ."

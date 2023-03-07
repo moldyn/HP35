@@ -13,7 +13,7 @@ To download all included submodules, please clone this repository with
 git clone --recurse-submodules git@github.com:moldyn/HP35.git
 cd HP35
 ```
-## Intermediate Steps
+## Create States
 ### Features: Backbone Dihedral Angles and Minimal Contact Distances
 In the directory `HP35-DESRES` you can find
 1. `hp35.dihs`: backbone dihedral angels given [degrees]
@@ -24,19 +24,15 @@ In the directory `HP35-DESRES` you can find
 for more details take a look at the [README](HP35-DESRES/README.md).
 
 ### Principal Components
+In the directory `PCA` you can find the resulting principal component projections
+1. `hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4`
+1. `hp35.mindists2.gaussian10f.proj.1-5`
+Furthermore you can find script to reproduce them.
 
 ### Microstate Trajectories
+In the directory `CLUSTERING` you can find the resulting microstate trajectories.
+1. `hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153`
+1. `hp35.mindist2.gaussian10f_microstates_pcs5_p153`
+Furthermore you can find script to reproduce them.
 
-
-## Reproducing the Results
-### Getting Started
-Simply clone this repository with
-```bash
-git clone --recurse-submodules git@github.com:moldyn/HP35.git
-cd HP35
-```
-### Reproducing the Microstate Trajectories
-Reproducing the published microstate trajectories can be achieved with
-```bash
-cd clustering && bash robust_clustering -c1
-```
+## Markov State Analysis
