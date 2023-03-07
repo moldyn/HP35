@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+### ROBUST CLUSTERING #########################################################
+# Reproduces the results of Nagel23 and show cases how to use the robust
+# clustering framework.
+#
+# If this script is used, please cite:
+# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
+# Case Study on HP35" J. Chem. Theory Comput., submitted
+#
+# Author: Daniel Nagel
+# Copyright (C) 2023, Daniel Nagel
+#
+# Arguments:
+#   h: show help
+#   v: set verbosity mode, the more consecutive 'v' the higher
+#   c: color_lvl - 0 none, 1 some, 2 utf8
+#
+###############################################################################
+
+### CONSTANTS #################################################################
+# variables
+readonly MPPLAG="50"
+
+# paths
+readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly DIHS_LINKAGE="hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat"
+readonly DIHS_FE="hp35.dihs.res3-33.shifted.gaussian10f.fe_pcs4"
+readonly DIHS_MS="../../CLUSTERING/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153"
+readonly DIHS_CUTOFFS="0.001 0.50"
+readonly CONS_LINKAGE="hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat"
+readonly CONS_FE="hp35.mindists2.gaussian10f.fe_pcs5"
+readonly CONS_MS="../../CLUSTERING/hp35.mindist2.gaussian10f_microstates_pcs5_p153"
+readonly CONS_CUTOFFS="0.005 0.50"
+readonly QFILE="hp35.mindists2.gaussian10f.q"
+readonly DIR="create_macrostate_nagel23"
+
+# define requirements except of python venv
+declare -a requirements=("python3")
+### MAIN ######################################################################
+main() {
+  # print welcome
+  print_welcome
+
+  # print user info and warning
+  print_info
+
+  # remove dir if existing
+  cd $DIR
+  printf "\n"
+
+  pheader "CHECK REQUIREMENTS"
+  for req in "${requirements[@]}"; do
+    run_command "$req" "command -v $req >/dev/null 2>&1"
+  done
+  run_command "python venv" "python3 -m venv -h >/dev/null 2>&1"
+  cleanup_if_failed
+
+
+  ### SETUP PYTHON VENV #######################################################
+  pheader "SETUP PYTHON VENV"
+  run_command "create venv" "python3 -m venv Python"
+  run_command "activate venv" ". Python/bin/activate"
+  run_command "update pip" "pip install --upgrade pip"
+  run_command "install dependencies" "pip install msmhelper tqdm prettypyplot scipy click numpy"
+  cleanup_if_failed
+
+
+  ### CREATE MACROSTATES AND DENDROGRAM #######################################
+  pheader "CREATE MACROSTATES"
+  run_command "create dihedral-based macrostates + dendrogram" \
+              "python ../process_mpp.py --linkage $DIHS_LINKAGE --tlag $MPPLAG --state-traj $DIHS_MS --cut-params $DIHS_CUTOFFS --fraction-of-native-contacts $QFILE --hide-labels"
+  run_command "create contact-based macrostates + dendrogram" \
+              "python ../process_mpp.py --linkage $CONS_LINKAGE --tlag $MPPLAG --state-traj $CONS_MS --cut-params $CONS_CUTOFFS --fraction-of-native-contacts $QFILE --hide-labels"
+  cleanup_if_failed
+  pprint "the final files can be find linked in root directory\n"
+}
+
+
+### DEFINE LOCAL FUNCTIONS ####################################################
+cleanup_if_failed() {
+  if [[ $return_val != 0 ]]; then
+    cd ..;
+    err "aborting"
+    printf "%b\n" "$reset"
+    exit $return_val
+  fi
+}
+
+print_welcome() {
+  # reset font
+  printf "%b" "${reset}"
+
+  local _str=$(pbox "${bold}~~~ MACROSTATES CREATION ~~~" "$blue")
+  printf "\n%b%b\n" "$_str"
+  printf "generating macrostate trajectories of Nagel23 using backbone\n"
+  printf "dihedral angles and contact distances.\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2023, Daniel Nagel\n"
+  printf "\n"
+}
+
+
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
+
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+### SOURCE BASH HELPER FUNCTIONS ##############################################
+. ../bash-template/libbash.sh -d "$@"
+
+# run main
+main
+exit $return_val
