@@ -19,11 +19,10 @@
 
 ### CONSTANTS #################################################################
 # variables
-readonly SIGMA="10"
 readonly PMIN="153"
+readonly MPPLAG="50"
 
 # paths
-
 readonly MOLDYN_GIT="https://github.com/moldyn/"
 readonly PCA_DIR="../../PCA"
 readonly DIHS_PCS="${PCA_DIR}/hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4"
@@ -104,6 +103,8 @@ main() {
               "$CLUSTERING network -p $PMIN -b cluster -v"
   run_command "build microstate trajectory" \
               "$CLUSTERING density -f ../${DIHS_PCS} -i network_end_node_traj.dat -D fe -B nn -o $DIHS_MS -v"
+  run_command "run MPP" \
+              "$CLUSTERING mpp -s $DIHS_MS -l $MPPLAG -D fe -o ${DIHS_MS}.mpp${MPPLAG} -v"
   cd ../
   cleanup_if_failed
 
@@ -118,12 +119,14 @@ main() {
               "$CLUSTERING network -p $PMIN -b cluster -v"
   run_command "build microstate trajectory" \
               "$CLUSTERING density -f ../${CONS_PCS} -i network_end_node_traj.dat -D fe -B nn -o $CONS_MS -v"
+  run_command "run MPP" \
+              "$CLUSTERING mpp -s $CONS_MS -l $MPPLAG -D fe -o ${CONS_MS}.mpp${MPPLAG} -v"
   cd ../
   cleanup_if_failed
 
 
   ### LINK FINALE FILES  ######################################################
-  pheader "FINISHED"
+  pheader "LINK MICROSTATES"
   run_command "link dihedral-based microstates" "ln -s ${DIHS_MS#*../} ."
   run_command "link contact-based microstates" "ln -s ${CONS_MS#*../} ."
   pprint "the final files can be find linked in root directory\n"
