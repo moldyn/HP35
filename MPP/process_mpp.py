@@ -442,7 +442,7 @@ def _dendrogram(
 
     ax.set_ylabel(r'metastability $Q_\text{min}$')
     ax.set_xlabel('microstates')
-    ax.grid(b=False, axis='x')
+    ax.grid(visible=False, axis='x')
 
     return dendrogram_dict
 
@@ -723,7 +723,7 @@ def mpp_plus_dyn_cor(
     # dynamically reassign all new state to previous macrostates
     mstates = np.unique(dyn_corr_macrostates)
     while len(mstates) > n_macrostates:
-        tmat, mstates = mh.estimate_markov_model(
+        tmat, mstates = mh.msm.estimate_markov_model(
             mh.shift_data(traj, microstates, dyn_corr_macrostates),
             lagtime=tlag,
         )
