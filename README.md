@@ -4,8 +4,8 @@ reproduce the analysis of Nagel et al. 2023. If the provided scripts/files are
 used, please cite:
 > D. Nagel, S. Sartore, and G. Stock,  
 > *Selecting Features for Markov Modeling: A Case Study on HP35*,  
-> J. Chem. Theory Comput., submitted;  
-> doi: [xx.xxxx/x.xxxxxxx](https://aip.scitation.org/doi/xx.xxxx/x.xxxxxxx)
+> J. Chem. Theory Comput., submitted  
+> doi: [10.48550/ARXIV.2303.03814](https://doi.org/10.48550/ARXIV.2303.03814)
 
 ## Getting Started
 To download all included submodules, please clone this repository with
