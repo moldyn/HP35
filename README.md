@@ -39,4 +39,12 @@ In the directory [CLUSTERING](CLUSTERING) you can find the resulting microstate 
 1. `hp35.mindist2.gaussian10f_microstates_pcs5_p153`
 Furthermore you can find script to reproduce them. For more information please take a look at the [README](CLUSTERING).
 
+
+### Macrostate Trajectories
+In the directory [MPP](MPP) you can find the resulting macrostate trajectories.
+1. `hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj`
+1. `hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13`
+Furthermore you can find script to reproduce them. For more information please take a look at the [README](MPP).
+
+
 ## Markov State Analysis
