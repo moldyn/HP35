@@ -1,12 +1,12 @@
 # Markov State Analysis
 
-In this directory you find a script to redo the dynamical Markov state model
-analysis showin in Nagel et al. 2023 and the script `perform_msm` to reproduce
-these results.
+In this directory you find a script to perform the dynamical Markov state model
+analysis shown in Nagel et al. 2023 and the script `perform_msm` to reproduce
+the results.
 
 ## Timescale Analysis
 ### Resulting Figures
-All following figures are using the Hummer-Szabo projection. For the difference between w/o it, please refer to the [images](images) directory.
+All following figures are obtained using the Hummer-Szabo projection. To compare with the results obtained without the H-S projection, please refer to the [images](images) directory.
 
 
 | | Dihedral-Based States | Contact-Based States |
@@ -16,11 +16,11 @@ All following figures are using the Hummer-Szabo projection. For the difference 
 | Waiting Time Distribution | ![wtd](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wtd.sh.svg) | ![wtd](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wtd.sh.svg) |
 | Waiting Times | ![wts](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wts.sh.svg) | ![wts](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wts.sh.svg) |
 
-### How to Esimate
-All analysis are included in the Python package
-[msmhelper](https://moldyn.github.io/msmhelper/) and can be generated with its
-command-line interface. For more details and an installation instruction please
-checkout its documentation.
+### How to Estimate
+All analysis tools are included in the Python package
+[msmhelper](https://moldyn.github.io/msmhelper/) and they can be used with its
+command-line interface. For more details and installation instructions please
+refer to the package documentation.
 
 1. Estimating the Chapman-Kolmogorov tests
     ```bash
@@ -40,7 +40,7 @@ checkout its documentation.
         --filename macrostates \  # path tp macrostate trajectory
         --microfilename microstates  # if this line is neglected, the HS-projection will not be used
     ```
-1. Estimating the waiting time distribution as a function of the lagtime
+1. Estimating the waiting time distribution as a function of the lag time
     ```bash
     python -m msmhelper waiting-time-dist --frames-per-unit 5 --unit ns \  # specify unit
         --nsteps 100000000 \  # number of steps to propagate MCMC
@@ -65,7 +65,7 @@ To reproduce these results you simply have to run
 # this will create automatically a new Python environment
 bash perform_msm -c 1
 ```
-This creates inside the directory `create_msm_nagel23` a Python environment
-with all needed dependencies and creates all figures. If more information on
+This creates a Python environment
+with all needed dependencies in the directory `create_msm_nagel23`, and creates all figures. If more information on
 the executed commands is needed, please run the script in the verbose mode
 `-v`.
