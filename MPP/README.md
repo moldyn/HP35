@@ -4,13 +4,13 @@ In this directory you find the two final macrostates trajectories used in Nagel 
 
 ## Workflow to Create Macrostates
 Included macrostate trajectories:
-1. Dihedral-based macrostates: `hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj`
+1. Dihedral-based macrostates (12 states): `hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj`
     - Using a lagtime $\tau=10\text{ns}$
     - Using a required minimal population of $0.1%$ and a required minimal metastability of $0.5$.
-2. Contact-based macrostates: `hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj`
+2. Contact-based macrostates (13 states): `hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj`
     - Using a lagtime $\tau=10\text{ns}$
     - Using a required minimal population of $0.5%$ and a required minimal metastability of $0.5$.
-3. Contact-based macrostates: `hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13`
+3. Contact-based macrostates (12 states): `hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13`
     - Same as above, but states state 13 was merged into state 12, so $12, 13 \to 12$.
 
 Here is a short summary of how the macrostate trajectories were generated. For a more detailed description of the overall workflow, please take a look at the publication above.
