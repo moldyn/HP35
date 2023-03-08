@@ -7,8 +7,37 @@ Here we want to briefly summarize how the files were generated. For a more in de
 
 1. Applying most probable path lumping
     - In contrast to PCCA, MPP depends on the free energy. Therefore, we included the execution to the [perform_clustering](../CLUSTERING/perform_clustering) script.
-    - In general one obtains the needed files via `clustering mpp -s microstates -l lagtime -D fe -v` where `clustering` can be installed via `conda install moldyn-clustering -c conda-forge`, `microstates` is the microstate file, `fe` the file containing the free energy and the `lagtime` is given in frames.
+    - In general one obtains the needed files via
+      ```
+      clustering mpp \  # install via `conda install moldyn-clustering -c conda-forge`
+          -s microstates \  # path to microstate trajectory 
+          -l lagtime \  # lagtime to estimate Markov model [frames]
+          -D fe \  # time series of free energy estimation
+          -v  # verbose mode
+      ```
     - This results in the linkage matrix file, called `*_transitions.dat` 
 1. Automated branch detection
     - In Nagel et al. 2023 we suggested an improved version of MPP, which allows to automatically identify branches and perform an optimal lumping.
-    - ```python process_mpp.py --linkage linkagemat --tlag lagtime --state-traj microstates --cut-params minpop minq --fraction-of-native-contacts q_of_t --hide-labels```
+      ```bash
+      python process_mpp.py \
+          --linkage linkagemat \  # path to linkage matrix obtained via mpp
+          --tlag lagtime \  # same lagtime as used for mpp [frames]
+          --state-traj microstates \  # path to microstate trajectory
+          --cut-params minpop minq \  # minimum population and metastability both [0, 1]
+          --fraction-of-native-contacts q_of_t \  # time series of fraction of native contacts
+          --hide-labels  # hide x-ticklabels
+      ```
+    - The fraction of native contacts is available in [create_macrostate_nagel23/hp35.mindists2.gaussian10f.q](create_macrostate_nagel23/hp35.mindists2.gaussian10f.q)
+    - Please ensure that all dependencies are installed by creating a new conda environment or using venv.
+      ```bash
+      conda create -n hp35 -c conda-forge python msmhelper tqdm prettypyplot scipy click numpy
+      conda activate hp35
+      ```
+
+## Reproduce the Results
+To reproduce these results you simply have to run
+```bash
+# this will create automatically a new Python environment
+bash perform_mpp -c 1
+```
+This creates inside the directory `create_macrostate_nagel23` the dendrograms including the macrostate trajectories. If more information on the executed commands is needed, please run the script in the verbose mode `-v`.
