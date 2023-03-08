@@ -3,7 +3,7 @@
 In this directory you find the two final microstates trajectories used in Nagel et al. 2023 and the script `perform_clustering` to reproduce them.
 
 ## Workflow to Create Microstates
-Here is a brief summarize of how the two files were generated.
+Here is a brief summary of how the two files were generated.
 - `hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153`
     1. Estimate free energy with default parameters
     1. Apply free energy screening
