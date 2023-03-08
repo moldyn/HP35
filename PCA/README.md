@@ -1,9 +1,9 @@
 # Principal Components
 
-In this directory you find the two final principal component projections used in Nagel et al. 2023 and the script `perform_pca` to reproduce these results.
+In this directory you find the two final principal component projections used in Nagel et al. 2023 and the script `perform_pca` to reproduce them.
 
 ## Workflow to Create PCs
-Here we want to briefly summarize how the two files were generated. For a more in depth description, please take a look at the publication.
+Here is a brief summary of how the two files were generated. For a more detailed description, please take a look at the publication above.
 
 - `hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4`
     1. Discarding angles of residue 2 and 34, $\phi_2, \psi_2, \phi_{34}, \psi_{34}$
@@ -22,4 +22,4 @@ To reproduce these results you simply have to run
 # this will download and compile all needed files
 bash perform_pca -c 1
 ```
-This creates the directory `create_pca_nagel23` with the two projections including all intermediate steps.
+This creates the directory `create_pca_nagel23` with the two PCs projections, including all intermediate steps.
