@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+### ROBUST CLUSTERING #########################################################
+# Reproduces the results of Nagel23 and show cases how to use the robust
+# clustering framework.
+#
+# If this script is used, please cite:
+# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
+# Case Study on HP35" J. Chem. Theory Comput., submitted
+#
+# Author: Daniel Nagel
+# Copyright (C) 2023, Daniel Nagel
+#
+# Arguments:
+#   h: show help
+#   v: set verbosity mode, the more consecutive 'v' the higher
+#   c: color_lvl - 0 none, 1 some, 2 utf8
+#
+###############################################################################
+
+### CONSTANTS #################################################################
+# variables
+readonly UNIT="--frames-per-unit 5 --unit ns"
+readonly IMPL_KWARGS="--max-lagtime 210 --n-lagtimes 3 --ylog $UNIT"
+readonly CKTEST_KWARGS="--max-time 35000 --lagtimes 50 100 150 250 500 --grid 4 3 $UNIT" 
+readonly WTD_KWARGS="--nsteps 100000000 --start 12 --final 1 --max-lagtime 210 $UNIT"
+readonly WTS_KWARGS="--nsteps 100000000 --start 12 --final 1 --lagtimes 50 100 200 $UNIT"
+readonly MPPLAG="50"
+
+# paths
+readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly DIHS_MICRO="hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153"
+readonly CONS_MICRO="hp35.mindist2.gaussian10f_microstates_pcs5_p153"
+readonly DIHS_MACRO="hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj"
+readonly CONS_MACRO="hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13"
+
+readonly QFILE="hp35.mindists2.gaussian10f.q"
+readonly DIR="create_msm_nagel23"
+
+# commands
+readonly IMPL="python -m msmhelper implied-timescales"
+readonly CKTEST="python -m msmhelper ck-test"
+readonly WTD="python -m msmhelper waiting-time-dist"
+readonly WTS="python -m msmhelper waiting-times"
+
+# define requirements except of python venv
+declare -a requirements=("python3 venv")
+### MAIN ######################################################################
+main() {
+  # print welcome
+  print_welcome
+
+  # print user info and warning
+  print_info
+
+  # remove dir if existing
+  mkdir_ask $DIR
+  cd $DIR
+  printf "\n"
+
+  pheader "CHECK REQUIREMENTS"
+  for req in "${requirements[@]}"; do
+    run_command "$req" "command -v $req >/dev/null 2>&1"
+  done
+  run_command "python venv" "python3 -m venv -h >/dev/null 2>&1"
+  cleanup_if_failed
+
+
+  ### SETUP PYTHON VENV #######################################################
+  pheader "SETUP PYTHON VENV"
+  run_command "create venv" "python3 -m venv Python"
+  run_command "activate venv" ". Python/bin/activate"
+  run_command "update pip" "pip install --upgrade pip"
+  run_command "install dependencies" "pip install msmhelper"
+  cleanup_if_failed
+
+
+  ### LINK FILES ##############################################################
+  pheader "LINK FILES"
+  run_command "link dihedral-based microstates" "ln -s ../../CLUSTERING/$DIHS_MICRO ."
+  run_command "link dihedral-based macrostates" "ln -s ../../MPP/$DIHS_MACRO ."
+  run_command "link contact-based microstates" "ln -s ../../CLUSTERING/$CONS_MICRO ."
+  run_command "link contact-based macrostates" "ln -s ../../MPP/$CONS_MACRO ."
+  cleanup_if_failed
+
+
+  ### ESTIMATE IMPLIED TIMESCALE ##############################################
+  pheader "ESTIMATE IMPLIED TIMESCALE"
+  run_command "dihedral-based macrostates" \
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO"
+  run_command "contact-based macrostates" \
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO"
+  run_command "dihedral-based macrostates using Hummer-Szabo" \
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+  run_command "contact-based macrostates using Hummer-Szabo" \
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+  cleanup_if_failed
+
+
+  ### ESTIMATE CK-TESTS #######################################################
+  pheader "ESTIMATE CK-TESTS"
+  run_command "dihedral-based macrostates" \
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO"
+  run_command "contact-based macrostates" \
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO"
+  run_command "dihedral-based macrostates using Hummer-Szabo" \
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+  run_command "contact-based macrostates using Hummer-Szabo" \
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+  cleanup_if_failed
+
+
+  ### ESTIMATE WTD #######################################################
+  pheader "ESTIMATE WAITING TIME DISTRIBUTIONS"
+  run_command "dihedral-based macrostates" \
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO"
+  run_command "contact-based macrostates" \
+              "$WTD $WTD_KWARGS -f $CONS_MACRO"
+  run_command "dihedral-based macrostates using Hummer-Szabo" \
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+  run_command "contact-based macrostates using Hummer-Szabo" \
+              "$WTD $WTD_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+  cleanup_if_failed
+
+
+  ### ESTIMATE WTD #######################################################
+  pheader "ESTIMATE WAITING TIMES"
+  run_command "dihedral-based macrostates" \
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO"
+  run_command "contact-based macrostates" \
+              "$WTS $WTS_KWARGS -f $CONS_MACRO"
+  run_command "dihedral-based macrostates using Hummer-Szabo" \
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+  run_command "contact-based macrostates using Hummer-Szabo" \
+              "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+  cleanup_if_failed
+}
+
+
+### DEFINE LOCAL FUNCTIONS ####################################################
+cleanup_if_failed() {
+  if [[ $return_val != 0 ]]; then
+    cd ..;
+    err "aborting"
+    rmdir_ask $DIR
+    printf "%b\n" "$reset"
+    exit $return_val
+  fi
+}
+
+print_welcome() {
+  # reset font
+  printf "%b" "${reset}"
+
+  local _str=$(pbox "${bold}~~~ MSM ANALYSIS ~~~" "$blue")
+  printf "\n%b%b\n" "$_str"
+  printf "generating MSM figures of Nagel23 using backbone\n"
+  printf "dihedral angles and contact distances.\n" "$MOLDYN_GIT"
+  printf "Copyright (c) 2023, Daniel Nagel\n"
+  printf "\n"
+}
+
+
+print_info() {
+  local _user=$(whoami)
+  local _host=$(hostname)
+
+  pheader "RUNTIME INFORMATION"
+  pprint "user: ${_user}@${_host}\n"
+  warn "depening on the hardware it can take up to several hours.\n"
+  warn "several GB of data are downloaded, be sure to use wifi.\n"
+}
+
+
+### SOURCE BASH HELPER FUNCTIONS ##############################################
+. ../bash-template/libbash.sh -d "$@"
+
+# run main
+main
+exit $return_val
