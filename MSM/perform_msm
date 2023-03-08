@@ -86,52 +86,52 @@ main() {
   ### ESTIMATE IMPLIED TIMESCALE ##############################################
   pheader "ESTIMATE IMPLIED TIMESCALE"
   run_command "dihedral-based macrostates" \
-              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO"
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.impl.svg"
   run_command "contact-based macrostates" \
-              "$IMPL $IMPL_KWARGS -f $CONS_MACRO"
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.impl.svg"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.impl.sh.svg"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$IMPL $IMPL_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.impl.sh.svg"
   cleanup_if_failed
 
 
   ### ESTIMATE CK-TESTS #######################################################
   pheader "ESTIMATE CK-TESTS"
   run_command "dihedral-based macrostates" \
-              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO"
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.cktest.svg"
   run_command "contact-based macrostates" \
-              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO"
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.cktest.svg"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${CONS_MACRO}.cktest.sh.svg"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${DIHS_MACRO}.cktest.sh.svg"
   cleanup_if_failed
 
 
   ### ESTIMATE WTD #######################################################
   pheader "ESTIMATE WAITING TIME DISTRIBUTIONS"
   run_command "dihedral-based macrostates" \
-              "$WTD $WTD_KWARGS -f $DIHS_MACRO"
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wtd.svg"
   run_command "contact-based macrostates" \
-              "$WTD $WTD_KWARGS -f $CONS_MACRO"
+              "$WTD $WTD_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wtd.svg"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$WTD $WTD_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wtd.sh.svg"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$WTD $WTD_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+              "$WTD $WTD_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wtd.sh.svg"
   cleanup_if_failed
 
 
   ### ESTIMATE WTD #######################################################
   pheader "ESTIMATE WAITING TIMES"
   run_command "dihedral-based macrostates" \
-              "$WTS $WTS_KWARGS -f $DIHS_MACRO"
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wts.svg"
   run_command "contact-based macrostates" \
-              "$WTS $WTS_KWARGS -f $CONS_MACRO"
+              "$WTS $WTS_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wts.svg"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO"
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wts.sh.svg"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO"
+              "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wts.sh.svg"
   cleanup_if_failed
 }
 

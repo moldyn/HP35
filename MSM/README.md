@@ -5,6 +5,18 @@ analysis showin in Nagel et al. 2023 and the script `perform_msm` to reproduce
 these results.
 
 ## Timescale Analysis
+### Resulting Figures
+All following figures are using the Hummer-Szabo projection. For the difference between w/o it, please refer to the [images](images) directory.
+
+
+| | Dihedral-Based States | Contact-Based States |
+| :---: | :---: | :---: |
+| CK-test | ![ck-test](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.cktest.sh.state1-12.svg) | ![cktest](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.cktest.sh.state1-12.svg) |
+| Implied Timescales | ![implied timescales](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.impl.sh.svg) | ![implied timescales](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.impl.sh.svg) |
+| Waiting Time Distribution | ![wtd](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wtd.sh.svg) | ![wtd](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wtd.sh.svg) |
+| Waiting Times | ![wts](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wts.sh.svg) | ![wts](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wts.sh.svg) |
+
+### How to Esimate
 All analysis are included in the Python package
 [msmhelper](https://moldyn.github.io/msmhelper/) and can be generated with its
 command-line interface. For more details and an installation instruction please
