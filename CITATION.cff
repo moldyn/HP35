@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - given-names: "Daniel"
+    family-names: "Nagel"
+    orcid: "https://orcid.org/0000-0002-2863-2646"
+title: "Selecting Features for Markov Modeling: A Case Study on HP35"
+url: "https://github.com/moldyn/HP35"
+preferred-citation:
+  type: misc
+  title: "Selecting Features for Markov Modeling: A Case Study on HP35"
+  authors:
+  - given-names: "Daniel"
+    family-names: "Nagel"
+    orcid: "https://orcid.org/0000-0002-2863-2646"
+  - given-names: "Sofia"
+    family-names: "Sartore"
+  - given-names: "Gerhard"
+    family-names: "Stock"
+    orcid: "https://orcid.org/0000-0002-3302-3044"
+  doi: "10.48550/ARXIV.2303.03814"
+  publisher: "arXiv"
+  month: 3
+  year: 2023
