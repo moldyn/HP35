@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### ROBUST CLUSTERING #########################################################
-# Reproduces the results of Nagel23 and show cases how to use the robust
+# Reproduces the results of Nagel23 and showcases how to use the robust
 # clustering framework.
 #
 # If this script is used, please cite:
