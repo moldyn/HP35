@@ -19,9 +19,9 @@ For a more detailed description of the overall workflow, please take a look at t
 For more details on each step, please take a look at the [documentation](https://moldyn.github.io/Clustering/).
 
 ## Reproduce the Results
-To reproduce the resulting trajectory you simply have to run
+To reproduce the resulting trajectories you simply have to run
 ```bash
 # this will download and compile all needed files
 bash perform_clustering -c 1
 ```
-This creates the directory `create_clustering_nagel23` with the two projections including all intermediate steps. If you need more information on the executed commands, you can run the script in the verbose mode `-v`.
+This creates the directory `create_clustering_nagel23` with the two projections, including the output of all intermediate steps. If you need more information on the executed commands, you can run the script in the verbose mode `-v`.
