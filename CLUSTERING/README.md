@@ -15,10 +15,12 @@ Here we want to briefly summarize how the two files were generated. For a more i
     1. Apply minimal population cut-off with $P_\text{min}=153$
     1. Create microstate trajectory
 
+For more details on every single step, please take a look at the [documentation](https://moldyn.github.io/Clustering/).
+
 ## Reproduce the Results
 To reproduce these results you simply have to run
 ```bash
 # this will download and compile all needed files
 bash perform_clustering -c 1
 ```
-This creates the directory `create_clustering_nagel23` with the two projections including all intermediate steps.
+This creates the directory `create_clustering_nagel23` with the two projections including all intermediate steps. If more information on the executed commands is needed, please run the script in the verbose mode `-v`.
