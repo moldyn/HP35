@@ -44,7 +44,7 @@ readonly IMPL="python -m msmhelper implied-timescales"
 readonly CKTEST="python -m msmhelper ck-test"
 readonly WTD="python -m msmhelper waiting-time-dist"
 readonly WTS="python -m msmhelper waiting-times"
-readonly KNET="python ./kinetic_network.py"
+readonly KNET="./kinetic_network.py"
 
 # define requirements except of python venv
 declare -a requirements=("python3 venv")
