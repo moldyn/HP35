@@ -226,7 +226,7 @@ def draw_knetwork(states_traj, tlag, qoft, set_min_node_size, u, f):
     ax.set_ylim(lims[:, 2].min(), lims[:, 3].max())
 
     ax.set_axis_off()
-    pplt.savefig(f'{path.name}.dynamical_network.{tlag}f.pdf')
+    pplt.savefig(f'images/{path.name}.dynamical_network.{tlag}f.pdf')
 
 
 
