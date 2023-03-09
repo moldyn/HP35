@@ -15,6 +15,7 @@ All following figures are obtained using the Hummer-Szabo projection. To compare
 | Implied Timescales | ![implied timescales](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.impl.sh.svg) | ![implied timescales](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.impl.sh.svg) |
 | Waiting Time Distribution | ![wtd](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wtd.sh.svg) | ![wtd](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wtd.sh.svg) |
 | Waiting Times | ![wts](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.wts.sh.svg) | ![wts](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.wts.sh.svg) |
+| Kinetic Networks | ![knet](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.dynamical_network.50f.svg) | ![knet](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.dynamical_network.50f.svg) |
 
 ### How to Estimate
 All analysis tools are included in the Python package
