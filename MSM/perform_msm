@@ -43,7 +43,7 @@ readonly CONS_MACRO="hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_tran
 
 readonly QFILE="hp35.mindists2.gaussian10f.q"
 readonly DIR="create_msm_nagel23"
-readonly CONREP_KWARGS=" --grid 4 3--contacts $CONS_GAUSSIAN --clusters $MOSAIC_CLUSTERS"
+readonly CONREP_KWARGS="--grid 4 3 --contacts $CONS_GAUSSIAN --clusters $MOSAIC_CLUSTERS"
 
 # commands
 readonly IMPL="python -m msmhelper implied-timescales"
@@ -107,9 +107,9 @@ main() {
     run_command "smooth contacts with 2ns" "$GAUSSIAN -i ${CONS##*/} -s $SIGMA -o $CONS_GAUSSIAN"
   fi
   run_command "dihedral-based macrostates" \
-              "$CONREP $CONREP_KWARGS--state $DIHS_MACRO -o ${DIHS_MACRO}.conrep$EXT"
+              "$CONREP $CONREP_KWARGS --state $DIHS_MACRO -o ${DIHS_MACRO}.conrep$EXT"
   run_command "contact-based macrostates" \
-              "$CONREP $CONREP_KWARGS--state $CONS_MACRO -o ${CONS_MACRO}.conrep$EXT"
+              "$CONREP $CONREP_KWARGS --state $CONS_MACRO -o ${CONS_MACRO}.conrep$EXT"
   cleanup_if_failed
 
 
