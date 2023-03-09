@@ -4,6 +4,28 @@ In this directory you find a script to perform the dynamical Markov state model
 analysis shown in Nagel et al. 2023 and the script `perform_msm` to reproduce
 the results.
 
+## Structural Contact Representation
+| | Dihedral-Based States | Contact-Based States |
+| :---: | :---: | :---: |
+| Contact Rep. | ![conRep](./images/hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj.conrep.state1-12.svg) | ![conRep](./images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.conrep.state1-12.svg) |
+
+### How to Estimate
+The analysis is included in the Python package
+[msmhelper](https://moldyn.github.io/msmhelper/) and it can be used with its
+command-line interface. For more details and installation instructions please
+refer to the package documentation.
+
+1. Plot Contact Representation
+    ```bash
+    python -m msmhelper contact-rep \
+        --grid 4 3 \  # number of rows and cols
+        --contacts contacts \  # path to contacts file
+        --clusters mosaic_clusters \  # path to MoSAIC cluster file
+        --state macrostates  # path to macrostate trajectory
+    ```
+    In the following we are using the [hp35.mindists2](../HP35-DESRES/hp35.mindists2.bz2) as contacts and the corresponding MoSAIC clusters [hp35.mindist2.mosaic_clusters](hp35.mindist2.mosaic_clusters). To apply the MoSAIC cluster analysis, please take a look at [MoSAIC](https://moldyn.github.io/MoSAIC).
+
+
 ## Timescale Analysis
 ### Resulting Figures
 All following figures are obtained using the Hummer-Szabo projection. To compare with the results obtained without the H-S projection, please refer to the [images](images) directory.
