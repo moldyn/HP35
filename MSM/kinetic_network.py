@@ -11,7 +11,6 @@ from scipy.spatial import distance_matrix
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from matplotlib.collections import LineCollection
-from MDAnalysis.analysis import distances
 from pathlib import Path
 
 pplt.use_style(figsize=1.8, figratio=1)
