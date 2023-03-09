@@ -142,10 +142,10 @@ main() {
   
   ### PLOT KNET ##############################################
   pheader "PLOT KINETIC NETWORKS"
+  run_command "dihedral-based kinetic network" \
+              "$KNET $KNETD_KWARGS --states_traj $DIHS_MACRO --qoft $QFILE"
   run_command "contact-based kinetic network" \
               "$KNET $KNETC_KWARGS --states_traj $CONS_MACRO --qoft $QFILE"
-  run_command "dihedral-based kinetic network" \
-              "$KNET $KNETD_KWARGS --states_traj $CONS_MACRO --qoft $QFILE"
   cleanup_if_failed
 }
 
