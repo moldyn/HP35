@@ -74,7 +74,7 @@ main() {
   run_command "create venv" "python3 -m venv Python"
   run_command "activate venv" ". Python/bin/activate"
   run_command "update pip" "pip install --upgrade pip"
-  run_command "install dependencies" "pip install msmhelper networkx ForceAtlas2 MDAnalysis"
+  run_command "install dependencies" "pip install msmhelper networkx ForceAtlas2"
   cleanup_if_failed
 
 
