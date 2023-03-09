@@ -44,7 +44,7 @@ readonly IMPL="python -m msmhelper implied-timescales"
 readonly CKTEST="python -m msmhelper ck-test"
 readonly WTD="python -m msmhelper waiting-time-dist"
 readonly WTS="python -m msmhelper waiting-times"
-readonly KNET="python ./kinetic_network.py"
+readonly KNET="python ../kinetic_network.py"
 
 # define requirements except of python venv
 declare -a requirements=("python3 venv")
@@ -84,7 +84,7 @@ main() {
   run_command "link dihedral-based macrostates" "ln -s ../../MPP/$DIHS_MACRO ."
   run_command "link contact-based microstates" "ln -s ../../CLUSTERING/$CONS_MICRO ."
   run_command "link contact-based macrostates" "ln -s ../../MPP/$CONS_MACRO ."
-  run_command "link fraction of native contacts" "ln -s ../../MPP/$QFILE ."
+  run_command "link fraction of native contacts" "ln -s ../../MPP/create_macrostate_nagel23/$QFILE ."
   cleanup_if_failed
 
 
@@ -141,11 +141,11 @@ main() {
   
   
   ### PLOT KNET ##############################################
-  pheader "PLOT KINETIC NETWORKs"
+  pheader "PLOT KINETIC NETWORKS"
   run_command "contact-based kinetic network" \
-              "$KNET $KNETC_KWARGS --states_traj $CONSMACRO --qoft $QFILE"
+              "$KNET $KNETC_KWARGS --states_traj $CONS_MACRO --qoft $QFILE"
   run_command "dihedral-based kinetic network" \
-              "$KNET $KNETD_KWARGS --states_traj $DIHSMACRO --qoft $QFILE"
+              "$KNET $KNETD_KWARGS --states_traj $CONS_MACRO --qoft $QFILE"
   cleanup_if_failed
 }
 
