@@ -24,6 +24,8 @@ readonly IMPL_KWARGS="--max-lagtime 210 --n-lagtimes 3 --ylog $UNIT"
 readonly CKTEST_KWARGS="--max-time 35000 --lagtimes 50 100 150 250 500 --grid 4 3 $UNIT" 
 readonly WTD_KWARGS="--nsteps 100000000 --start 12 --final 1 --max-lagtime 210 $UNIT"
 readonly WTS_KWARGS="--nsteps 100000000 --start 12 --final 1 --lagtimes 50 100 200 $UNIT"
+readonly KNETC_KWARGS="-u 8 -u 9 -u 10 -u 11 -f 0 -f 1 -f 2 -f 3 -f 4 --tlag 50"
+readonly KNETD_KWARGS="-u 10 -u 11 -f 0 -f 1 -f 2 --tlag 50"
 readonly MPPLAG="50"
 
 # paths
@@ -41,6 +43,7 @@ readonly IMPL="python -m msmhelper implied-timescales"
 readonly CKTEST="python -m msmhelper ck-test"
 readonly WTD="python -m msmhelper waiting-time-dist"
 readonly WTS="python -m msmhelper waiting-times"
+readonly KNET="./kinetic_network.py"
 
 # define requirements except of python venv
 declare -a requirements=("python3 venv")
@@ -80,6 +83,7 @@ main() {
   run_command "link dihedral-based macrostates" "ln -s ../../MPP/$DIHS_MACRO ."
   run_command "link contact-based microstates" "ln -s ../../CLUSTERING/$CONS_MICRO ."
   run_command "link contact-based macrostates" "ln -s ../../MPP/$CONS_MACRO ."
+  run_command "link fraction of native contacts" "ln -s ../../MPP/$QFILE ."
   cleanup_if_failed
 
 
@@ -132,6 +136,15 @@ main() {
               "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wts.sh.svg"
   run_command "contact-based macrostates using Hummer-Szabo" \
               "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wts.sh.svg"
+  cleanup_if_failed
+  
+  
+  ### PLOT KNET ##############################################
+  pheader "PLOT KINETIC NETWORKs"
+  run_command "contact-based kinetic network" \
+              "$KNET $KNETC_KWARGS --states_traj $CONSMACRO --qoft $QFILE"
+  run_command "dihedral-based kinetic network" \
+              "$KNET $KNETD_KWARGS --states_traj $DIHSMACRO --qoft $QFILE"
   cleanup_if_failed
 }
 
