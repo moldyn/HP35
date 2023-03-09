@@ -110,10 +110,7 @@ def get_luminance(hex_color):
     help='lag time in frames for respective state traj',
 )
 def draw_knetwork(states_traj, tlag, qoft, set_min_node_size, u, f):
-    # '../states_analysis_paper/hp35.selected_contacts.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.dyn_cor.macrotraj_lumped13'
-    # '../states_analysis_paper/state_colors/hp35.selected_contacts.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_py_compactness.pop0.005_qmin0.50.dyn_cor.macrotraj_lumped13.colors'
-    # tlag = 50f
-    # qoft_file '../MPP//hp35.mindists2.gaussian10f.q'
+    
     for filename, lagtime in ((states_traj, tlag),):
         path = Path(f'{filename}')
         _, ax = plt.subplots()
