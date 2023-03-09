@@ -58,6 +58,13 @@ refer to the package documentation.
         --filename macrostates \  # path tp macrostate trajectory
         --microfilename microstates  # if this line is neglected, the HS-projection will not be used
     ```
+1. Plotting the kinetic networks
+    ```bash
+    ./kinetic_network.py -u 8 -u 9 -u 10 -u 11 -f 0 -f 1 -f 2 -f 3 -f 4 \  # unfolded states and folded states (here contact-based)
+        --tlag 50 \  # lag time, in [frames]
+        --states_traj \  # path to macrostate trajectory
+        --qoft  \ # path to fraction of contacts file
+    ```
 
 ## Reproduce the Results
 To reproduce these results you simply have to run
