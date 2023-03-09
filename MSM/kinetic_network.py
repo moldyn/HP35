@@ -230,7 +230,7 @@ def draw_knetwork(states_traj, tlag, qoft, set_min_node_size, u, f):
         ax.set_ylim(lims[:, 2].min(), lims[:, 3].max())
 
         ax.set_axis_off()
-        pplt.savefig(f'{path.name}.dynamical_network.{lagtime}f.pdf')
+        pplt.savefig(f'create_msm_nagel23/{path.name}.dynamical_network.{lagtime}f.pdf')
 
 
 
