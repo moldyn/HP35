@@ -27,6 +27,7 @@ readonly WTS_KWARGS="--nsteps 100000000 --start 12 --final 1 --lagtimes 50 100 2
 readonly KNETC_KWARGS="-u 8 -u 9 -u 10 -u 11 -f 0 -f 1 -f 2 -f 3 -f 4 --tlag 50"
 readonly KNETD_KWARGS="-u 10 -u 11 -f 0 -f 1 -f 2 --tlag 50"
 readonly MPPLAG="50"
+readonly EXT=".svg"
 
 # paths
 readonly MOLDYN_GIT="https://github.com/moldyn/"
@@ -43,7 +44,7 @@ readonly IMPL="python -m msmhelper implied-timescales"
 readonly CKTEST="python -m msmhelper ck-test"
 readonly WTD="python -m msmhelper waiting-time-dist"
 readonly WTS="python -m msmhelper waiting-times"
-readonly KNET="./kinetic_network.py"
+readonly KNET="python ../kinetic_network.py"
 
 # define requirements except of python venv
 declare -a requirements=("python3 venv")
@@ -90,52 +91,52 @@ main() {
   ### ESTIMATE IMPLIED TIMESCALE ##############################################
   pheader "ESTIMATE IMPLIED TIMESCALE"
   run_command "dihedral-based macrostates" \
-              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.impl.svg"
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.impl$EXT"
   run_command "contact-based macrostates" \
-              "$IMPL $IMPL_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.impl.svg"
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.impl$EXT"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.impl.sh.svg"
+              "$IMPL $IMPL_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.impl.sh$EXT"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$IMPL $IMPL_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.impl.sh.svg"
+              "$IMPL $IMPL_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.impl.sh$EXT"
   cleanup_if_failed
 
 
   ### ESTIMATE CK-TESTS #######################################################
   pheader "ESTIMATE CK-TESTS"
   run_command "dihedral-based macrostates" \
-              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.cktest.svg"
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.cktest$EXT"
   run_command "contact-based macrostates" \
-              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.cktest.svg"
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.cktest$EXT"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${CONS_MACRO}.cktest.sh.svg"
+              "$CKTEST $CKTEST_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${CONS_MACRO}.cktest.sh$EXT"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${DIHS_MACRO}.cktest.sh.svg"
+              "$CKTEST $CKTEST_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${DIHS_MACRO}.cktest.sh$EXT"
   cleanup_if_failed
 
 
   ### ESTIMATE WTD #######################################################
   pheader "ESTIMATE WAITING TIME DISTRIBUTIONS"
   run_command "dihedral-based macrostates" \
-              "$WTD $WTD_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wtd.svg"
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wtd$EXT"
   run_command "contact-based macrostates" \
-              "$WTD $WTD_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wtd.svg"
+              "$WTD $WTD_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wtd$EXT"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$WTD $WTD_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wtd.sh.svg"
+              "$WTD $WTD_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wtd.sh$EXT"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$WTD $WTD_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wtd.sh.svg"
+              "$WTD $WTD_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wtd.sh$EXT"
   cleanup_if_failed
 
 
   ### ESTIMATE WTD #######################################################
   pheader "ESTIMATE WAITING TIMES"
   run_command "dihedral-based macrostates" \
-              "$WTS $WTS_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wts.svg"
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO -o ${DIHS_MACRO}.wts$EXT"
   run_command "contact-based macrostates" \
-              "$WTS $WTS_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wts.svg"
+              "$WTS $WTS_KWARGS -f $CONS_MACRO -o ${CONS_MACRO}.wts$EXT"
   run_command "dihedral-based macrostates using Hummer-Szabo" \
-              "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wts.sh.svg"
+              "$WTS $WTS_KWARGS -f $DIHS_MACRO --microfilename $DIHS_MICRO -o ${DIHS_MACRO}.wts.sh$EXT"
   run_command "contact-based macrostates using Hummer-Szabo" \
-              "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wts.sh.svg"
+              "$WTS $WTS_KWARGS -f $CONS_MACRO --microfilename $CONS_MICRO -o ${CONS_MACRO}.wts.sh$EXT"
   cleanup_if_failed
   
   
