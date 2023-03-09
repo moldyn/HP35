@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+"""Plotting curved edges for undirected graphs with NetworkX<3.
 
-
-'''Taken from  https://github.com/beyondbeneath/bezier-curved-edges-networkx
+Taken from  https://github.com/beyondbeneath/bezier-curved-edges-networkx
 
 MIT License
 
@@ -23,11 +23,9 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.'''
+SOFTWARE.
 
-
-
-
+"""
 import bezier
 import networkx as nx
 import numpy as np
