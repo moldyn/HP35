@@ -27,10 +27,15 @@ readonly WTS_KWARGS="--nsteps 100000000 --start 12 --final 1 --lagtimes 50 100 2
 readonly KNETC_KWARGS="-u 8 -u 9 -u 10 -u 11 -f 0 -f 1 -f 2 -f 3 -f 4 --tlag 50"
 readonly KNETD_KWARGS="-u 10 -u 11 -f 0 -f 1 -f 2 --tlag 50"
 readonly MPPLAG="50"
+readonly SIGMA="10"
 readonly EXT=".svg"
 
 # paths
 readonly MOLDYN_GIT="https://github.com/moldyn/"
+readonly DESRES="../../HP35-DESRES"
+readonly CONS="${DESRES}/hp35.mindists2"
+readonly CONS_GAUSSIAN="hp35.mindists2.gaussian${SIGMA}f"
+readonly MOSAIC_CLUSTERS="../hp35.mindist2.mosaic_clusters"
 readonly DIHS_MICRO="hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153"
 readonly CONS_MICRO="hp35.mindist2.gaussian10f_microstates_pcs5_p153"
 readonly DIHS_MACRO="hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153.mpp50_transitions.dat.renamed_by_q.pop0.001_qmin0.50.macrotraj"
@@ -38,16 +43,19 @@ readonly CONS_MACRO="hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_tran
 
 readonly QFILE="hp35.mindists2.gaussian10f.q"
 readonly DIR="create_msm_nagel23"
+readonly CONREP_KWARGS=" --grid 4 3--contacts $CONS_GAUSSIAN --clusters $MOSAIC_CLUSTERS"
 
 # commands
 readonly IMPL="python -m msmhelper implied-timescales"
 readonly CKTEST="python -m msmhelper ck-test"
 readonly WTD="python -m msmhelper waiting-time-dist"
 readonly WTS="python -m msmhelper waiting-times"
+readonly GAUSSIAN="python -m msmhelper gaussian-filtering"
+readonly CONREP="python -m msmhelper contact-rep"
 readonly KNET="python ../kinetic_network.py"
 
 # define requirements except of python venv
-declare -a requirements=("python3 venv")
+declare -a requirements=("python3 venv bunzip2")
 ### MAIN ######################################################################
 main() {
   # print welcome
@@ -84,7 +92,24 @@ main() {
   run_command "link dihedral-based macrostates" "ln -s ../../MPP/$DIHS_MACRO ."
   run_command "link contact-based microstates" "ln -s ../../CLUSTERING/$CONS_MICRO ."
   run_command "link contact-based macrostates" "ln -s ../../MPP/$CONS_MACRO ."
+  run_command "link contacts file" "ln -s $CONS ."
   run_command "link fraction of native contacts" "ln -s ../../MPP/create_macrostate_nagel23/$QFILE ."
+  cleanup_if_failed
+
+
+  ### ESTIMATE IMPLIED TIMESCALE ##############################################
+  pheader "CREATE CONTACT REPRESENTATIONS"
+  if [[ ! -f $CONS ]]; then
+    run_command "check contacts archive" "bunzip2 -t ${CONS}.bz2 &>/dev/null"
+    run_command "extract contacts file" "bunzip2 -k ${CONS}.bz2"
+  fi
+  if [[ ! -f $CONS_GAUSSIAN ]]; then
+    run_command "smooth contacts with 2ns" "$GAUSSIAN -i ${CONS##*/} -s $SIGMA -o $CONS_GAUSSIAN"
+  fi
+  run_command "dihedral-based macrostates" \
+              "$CONREP $CONREP_KWARGS--state $DIHS_MACRO -o ${DIHS_MACRO}.conrep$EXT"
+  run_command "contact-based macrostates" \
+              "$CONREP $CONREP_KWARGS--state $CONS_MACRO -o ${CONS_MACRO}.conrep$EXT"
   cleanup_if_failed
 
 
