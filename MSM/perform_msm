@@ -4,8 +4,8 @@
 # clustering framework.
 #
 # If this script is used, please cite:
-# D. Nagel, S. Satore, and G. Stock, "Selecting Features for Markov Modeling: A
-# Case Study on HP35" J. Chem. Theory Comput., submitted
+# D. Nagel, S. Sartore, and G. Stock, "Selecting Features for Markov Modeling:
+# A Case Study on HP35" J. Chem. Theory Comput., submitted
 #
 # Author: Daniel Nagel
 # Copyright (C) 2023, Daniel Nagel
@@ -82,7 +82,7 @@ main() {
   run_command "create venv" "python3 -m venv Python"
   run_command "activate venv" ". Python/bin/activate"
   run_command "update pip" "pip install --upgrade pip"
-  run_command "install dependencies" "pip install msmhelper networkx ForceAtlas2 bezier"
+  run_command "install dependencies" "pip install msmhelper networkx==2.8 fa2 bezier"
   cleanup_if_failed
 
 

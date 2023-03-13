@@ -110,12 +110,12 @@ def draw_knetwork(states_traj, tlag, qoft, set_min_node_size, u, f):
     path = Path(f'{states_traj}')
     _, ax = plt.subplots()
     traj = mh.opentxt(states_traj).astype(int)
-    tmat, states = mh.estimate_markov_model(traj, tlag)
+    tmat, states = mh.msm.estimate_markov_model(traj, tlag)
     n_nodes = len(np.unique(states))
     color_list = assign_color(qoft, states, traj, levels=10)
 
     # get detailed balance
-    pop_eq = mh.equilibrium_population(tmat)
+    pop_eq = mh.msm.equilibrium_population(tmat)
     mat = tmat * pop_eq[:, np.newaxis]
     mat = 0.5 * (mat + mat.T)
 
