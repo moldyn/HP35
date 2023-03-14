@@ -59,3 +59,7 @@ take a look at the [README](MPP).
 In the directory [MSM](MSM) you can find a description of how to reproduce the
 Markov state model analysis of Nagel et al. 2023. All the analysis is based on
 the Python package [msmhelper](https://moldyn.github.io/msmhelper/).
+
+| CK-test | Kinetic Network | Contact Rep. | 
+| :---: | :---: | :---: |
+| ![cktest](MSM/images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.cktest.sh.state1-12.svg) | ![knet](MSM/images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.dynamical_network.50f.svg) | ![conRep](MSM/images/hp35.mindists2.gaussian10f_microstates_pcs5_p153.mpp50_transitions.dat.renamed_by_q.pop0.005_qmin0.50.macrotraj_lumped13.conrep.state1-12.svg) |
