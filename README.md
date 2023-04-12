@@ -8,6 +8,7 @@ used, please cite:
 > doi: [10.48550/ARXIV.2303.03814](https://doi.org/10.48550/ARXIV.2303.03814)
 
 ## Getting Started
+> **DEPENDENCY**: [git-lfs](https://git-lfs.github.com) is needed for large file support
 To download all the included submodules, please clone this repository with
 ```bash
 git clone --recurse-submodules git@github.com:moldyn/HP35.git
