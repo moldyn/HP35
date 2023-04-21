@@ -3,7 +3,7 @@
 # Created Thu Jul 28 11:09:08 2022
 # by following command:
 #
-# clustering density -f hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4 -i network_end_node_traj.dat -D fe -B nn -o hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153 -v 
+# clustering density -f hp35.dihs.res3-33.shifted.gaussian10f.proj.1-4 -i network_end_node_traj.dat -D hp35.dihs.res3-33.shifted.gaussian10f.fe_pcs4 -B hp35.dihs.res3-33.shifted.gaussian10f.nn_pcs4 -o hp35.dihs.res3-33.shifted.gaussian10f_microstates_pcs4_p153 -v 
 #
 # Copyright (c) 2015-2019 Florian Sittel and Daniel Nagel
 # please cite the corresponding paper, see https://github.com/moldyn/clustering

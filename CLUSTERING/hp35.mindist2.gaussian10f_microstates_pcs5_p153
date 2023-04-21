@@ -3,7 +3,7 @@
 # Created Thu Jul 28 03:27:37 2022
 # by following command:
 #
-# clustering density -n 1 -f hp35.mindists2.gaussian10f.proj.1-5 -i network_end_node_traj.dat -D fe -B nn -o hp35.mindists2.gaussian10f_microstates_pcs5_p153 -v 
+# clustering density -n 1 -f hp35.selected_contacts.gaussian10f.proj.1-5 -i network_end_node_traj.dat -D hp35.selected_contacts.gaussian10f.fe_pcs5 -B hp35.selected_contacts.gaussian10f.nn_pcs5 -o hp35.selected_contacts.gaussian10f_microstates_pcs5_p153 -v 
 #
 # Copyright (c) 2015-2019 Florian Sittel and Daniel Nagel
 # please cite the corresponding paper, see https://github.com/moldyn/clustering
