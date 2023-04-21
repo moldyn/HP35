@@ -15,6 +15,9 @@ To download all the included submodules, please clone this repository with
 git clone --recurse-submodules git@github.com:moldyn/HP35.git
 cd HP35
 ```
+> To keep the prerequisites as low as possible, we use the slower CPU
+> implementation of density-based clustering here.
+
 ## Create States
 ### Features: Backbone Dihedral Angles and Minimal Contact Distances
 In the directory `HP35-DESRES` you can find

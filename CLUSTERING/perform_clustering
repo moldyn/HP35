@@ -37,7 +37,7 @@ readonly DIR="create_microstates_nagel23"
 readonly CLUSTERING="../Clustering/build/clustering"
 
 # define requirements except of python venv
-declare -a requirements=("gcc" "nvcc" "git" "git-lfs")
+declare -a requirements=("gcc" "git" "git-lfs")
 ### MAIN ######################################################################
 main() {
   # print welcome
@@ -78,15 +78,7 @@ main() {
   run_command "clone ${MOLDYN_GIT}Clustering.git" \
               "git clone ${MOLDYN_GIT}Clustering.git"
   cd Clustering && mkdir build && cd build
-  # todo allow gcc 5 for cuda < 9.2
-  nvcc_ver=$(nvcc --version | grep -o -P '(?<=release ).*(?=, V)')
-  if [[ ${nvcc_ver:0:1} > 8 && ${nvcc_ver:2:1} > 1 ]]; then
-    gcc_ver=7
-  else
-    gcc_ver=5
-  fi
-  run_command "cmake" \
-              "cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-${gcc_ver} -DCMAKE_CXX_COMPILER=/usr/bin/g++-${gcc_ver} -DUSE_CUDA=1"
+  run_command "cmake" "cmake .."
   run_command "make" "make"
   cd ../../
   cleanup_if_failed
